@@ -1,0 +1,72 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="10dip"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TextView
+        android:text="@string/Restaurant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:id="@+id/RestaurantCrusine"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="5"
+        android:id="@+id/restaurantspinner"
+        android:layout_marginLeft="30dp"
+        android:layout_marginStart="30dp"
+        android:layout_toRightOf="@+id/RestaurantCrusine"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="2dp"
+        android:entries="@array/RestaurantPick" />
+
+    <TextView
+        android:text="@string/Rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:id="@+id/Rating"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_below="@+id/RestaurantCrusine"
+        android:layout_alignParentStart="true" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="5"
+        android:id="@+id/ratingspinner"
+        android:layout_marginLeft="30dp"
+        android:entries="@array/RatingPick"
+        android:layout_alignBaseline="@+id/Rating"
+        android:layout_alignBottom="@+id/Rating"
+        android:layout_alignEnd="@+id/restaurantspinner" />
+
+    <Button
+        android:text="@string/Done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ratingspinner"
+        android:layout_toEndOf="@+id/Rating"
+        android:layout_marginStart="61dp"
+        android:layout_marginTop="23dp"
+        android:id="@+id/Done"/>
+
+
+    <!--    <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="5"
+            android:id="@+id/problemsSpinner"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/RestaurantCrusine"
+            android:layout_toEndOf="@+id/RestaurantCrusine" />-->
+
+</RelativeLayout>

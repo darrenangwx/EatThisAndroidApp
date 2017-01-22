@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Switch
+        android:id="@+id/switchffnm"
+        android:text="@string/ffnm"
+        android:textSize="18sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/buttonGo"
+        android:text="@string/Go"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="67dp"
+        android:layout_alignTop="@+id/checkBox"
+        android:layout_centerHorizontal="true" />
+
+    <CheckBox
+        android:text="@string/advSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:id="@+id/checkBox"
+        android:layout_below="@+id/editText5"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="@string/inputLocation"
+        android:ems="10"
+        android:gravity="center"
+        android:id="@+id/editText5"
+        android:layout_marginTop="136dp"
+        android:layout_below="@+id/switchffnm"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">EatThis</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="ffnm">Find Food Near Me</string>
+    <string name="Go">GO</string>
+    <string name="advSearch">Advance Search</string>
+    <string name="inputLocation">Input Location</string>
+
+    <string name="Advanced_Search_title">Advance Search</string>
+    <string name="Restaurant">Restaurant Crusine</string>
+    <string name="Rating">Rating</string>
+    <string name="Done">Done</string>>
+
+    <string name="search">Search</string>
+    <string name="favourites">Favourites</string>
+    <string name="about">About</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="change_restaurant">Change Restaurant</string>
+
+    <string-array name="RestaurantPick">
+        <item>No Preference</item>
+        <item>Chinese</item>
+        <item>Japanese</item>
+        <item>Thailand</item>
+        <item>Western</item>
+    </string-array>
+    <string-array name="RatingPick">
+        <item>No Rating</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+</resources>
