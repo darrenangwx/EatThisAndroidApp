@@ -1,5 +1,7 @@
 package com.mds.eatthis;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -26,6 +29,9 @@ public class SearchFrag extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+
+
         //returning our layout file
         //change R.layout.yourlayoutfilename for each of your fragments
         View v = inflater.inflate(R.layout.fragment_menu_search, container, false);
@@ -54,6 +60,7 @@ public class SearchFrag extends Fragment {
             }
         });
 
+
         //for Go button
         buttonGo = (Button) v.findViewById(R.id.buttonGo);
         buttonGo.setOnClickListener(new Button.OnClickListener() {
@@ -61,6 +68,7 @@ public class SearchFrag extends Fragment {
             public void onClick(View view) {
                 Fragment fragment = new MapViewFrag();
                 replaceFragment(fragment);
+                hideKeyboard(getContext());
 
             }
         });
@@ -89,4 +97,19 @@ public class SearchFrag extends Fragment {
             editText.setVisibility(View.VISIBLE);
         }
     }
+
+    public static void hideKeyboard(Context ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // check if no view has focus:
+        View v = ((Activity) ctx).getCurrentFocus();
+        if (v == null)
+            return;
+
+        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+
+
 }

@@ -44,6 +44,13 @@
         android:id="@+id/editText5"
         android:layout_marginTop="136dp"
         android:layout_below="@+id/switchffnm"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        />
+
+
+
+
+
+
 
 </RelativeLayout>
