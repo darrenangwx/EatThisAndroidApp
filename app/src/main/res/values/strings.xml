@@ -34,4 +34,6 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+
+    <string name="about_text">Having troubles deciding what to eat? Let this app help you! Switch on your GPS or key in your location and we will choose a suitable place for you to eat nearby. Never will you have to wreck your brains about meals ever again!</string>
 </resources>

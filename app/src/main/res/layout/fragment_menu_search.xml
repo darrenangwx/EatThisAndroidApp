@@ -45,6 +45,7 @@
         android:layout_marginTop="136dp"
         android:layout_below="@+id/switchffnm"
         android:layout_centerHorizontal="true"
+        android:focusable="false"
         />
 
 

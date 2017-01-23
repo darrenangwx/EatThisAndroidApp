@@ -14,6 +14,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.Activity;
@@ -49,6 +50,10 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     MapView mMapView;
     private ImageButton heartButton;
     int testid = 1;
+
+    //http://www.chupamobile.com/tutorial-android/integrating-google-maps-in-android-app-53
+    //can reference this for gps location
+
 
     @Nullable
     @Override
