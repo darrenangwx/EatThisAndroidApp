@@ -3,9 +3,8 @@ package com.mds.eatthis;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+
+import com.google.android.gms.location.*;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,20 +43,33 @@ import java.sql.SQLOutput;
 /**
  * Created by Darren on 1/22/2017.
  */
-public class MapViewFrag extends Fragment implements OnMapReadyCallback{
+public class MapViewFrag extends Fragment implements OnMapReadyCallback,
+GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private GoogleMap gMap;
     MapView mMapView;
     private ImageButton heartButton;
     int testid = 1;
+    GoogleApiClient mGoogleApiClient = null;
+    LocationRequest locationRequest = null;
+    double mLatitude, mLongtitude;
+
 
     //http://www.chupamobile.com/tutorial-android/integrating-google-maps-in-android-app-53
     //can reference this for gps location
 
-
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setLocationLocationRequest();
+        System.out.println("HEREERERE");
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+
+        System.out.println("HERLIHNERKJB");
         //returning our layout file
         //change R.layout.yourlayoutfilename for each of your fragments
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -72,7 +84,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
         mMapView.getMapAsync(this);
-
         heartButton = (ImageButton) v.findViewById(R.id.heartborder);
         heartButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,11 +114,60 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
-
+        System.out.println(mLongtitude + mLatitude + "HLKDJHFLKSDHF");
         // Add a marker in Sydney and move the camera
-        LatLng place = new LatLng(1.383802,103.7683693);
-        gMap.addMarker(new MarkerOptions().position(place).title("Marker in Sydney"));
+        LatLng place = new LatLng(mLongtitude,mLatitude);
+        gMap.addMarker(new MarkerOptions().position(place).title("Marker in Sydneykgklgl"));
         float zoomlevel = (float) 17.0;
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place, zoomlevel));
+    }
+
+    private void setLocationLocationRequest(){
+        System.out.println(";laksjdf;LKJf;lDJKf;KJF;lk");
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+
+            System.out.println(mGoogleApiClient  + "GAPICLIENT");
+        }
+    }
+
+    @Override
+    public void onStart() {
+        System.out.println("ONSTART");
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLatitude = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient).getLatitude();
+        System.out.println(locationRequest + "HIHIOHUIH");
+        /*if (locationRequest != null) {
+            mLatitude = locationRequest.getLatitude();
+            System.out.println(mLatitude + "LAT");
+            mLongtitude = locationRequest.getLongitude();
+            System.out.println(mLongtitude + " LONG");
+
+        }*/
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+       // Log.i(LOG_TAG,"onConnectionFailed:"+connectionResult.getErrorCode()+","+connectionResult.getErrorMessage());
     }
 }
