@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
@@ -80,8 +81,12 @@ public class SearchFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
+                    AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                            .setCountry("SG")
+                            .build();
+
                     Intent intent =
-                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).setFilter(typeFilter)
                                     .build(getActivity());
                     startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                     
@@ -104,6 +109,8 @@ public class SearchFrag extends Fragment {
                 Fragment fragment = new MapViewFrag();
                 replaceFragment(fragment);
                 hideKeyboard(getContext());
+
+
 
             }
         });
@@ -150,8 +157,9 @@ public class SearchFrag extends Fragment {
 
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
                 Toast.makeText(this.getActivity(), "Using GPS", Toast.LENGTH_SHORT).show();
-            }else{
 
+
+            }else{
                 showGPSDisabledAlertToUser();
             }
         }
