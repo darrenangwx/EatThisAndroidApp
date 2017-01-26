@@ -39,7 +39,7 @@ import static com.google.android.gms.wearable.DataMap.TAG;
  * Created by Darren on 1/22/2017.
  */
 
-//TODO from here pass values to loading screen which will do the necessary checking and then loading screen pass parameters to mapfrag get location to here and pass the value to the Map Fragment
+
 public class SearchFrag extends Fragment {
     EditText editText;
     Switch switchffnm;
@@ -58,9 +58,12 @@ public class SearchFrag extends Fragment {
         View v = inflater.inflate(R.layout.fragment_menu_search, container, false);
 
         //for text box
-        editText = (EditText) v.findViewById(R.id.editText5);
+        editText = (EditText) v.findViewById(R.id.inputLocation);
         editText.setVisibility(View.VISIBLE);
+
+        //set values back to 0
         savePreferences("switchValue", "0");
+        savePreferences("inputLocID","0");
 
         //for find food near me switch
         switchffnm = (Switch) v.findViewById(R.id.switchffnm);
@@ -112,11 +115,17 @@ public class SearchFrag extends Fragment {
         buttonGo.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Fragment fragment = new LoadingFrag();
-                replaceFragment(fragment);
-                //TODO need a better way to hide keyboard
-                hideKeyboard(getContext());
-                //TODO check if gps is enabled again, if disabled but switch enabled, turn switch off
+                String edtext = editText.getText().toString().trim();
+                if(!switchffnm.isChecked() && edtext.isEmpty() || switchffnm.isChecked() && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                    showErrorDialog();
+                }else{
+                    Fragment fragment = new LoadingFrag();
+                    replaceFragment(fragment);
+                    //TODO maybe not needed anymore cos google autocomplete helped us to it
+                    hideKeyboard(getContext());
+                }
+
+
 
             }
         });
@@ -128,8 +137,8 @@ public class SearchFrag extends Fragment {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(SearchFrag.this.getActivity(), data);
-
                 editText.setText(place.getName());
+                savePreferences("inputLocID", place.getId());
                 Log.i(TAG, "Place: " + place.getName());
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(SearchFrag.this.getActivity(), data);
@@ -172,6 +181,9 @@ public class SearchFrag extends Fragment {
     public void GPS(View view){
         if(((Switch)view).isChecked()){
             editText.setVisibility(View.INVISIBLE);
+            //clear locid in preferences and text input
+            savePreferences("inputLocID", "0");
+            editText.setText("");
             locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
             //setting switchValue to true and putting it inside shared pref
             switchValue = "1";
@@ -189,6 +201,20 @@ public class SearchFrag extends Fragment {
             savePreferences("switchValue", switchValue);
         }
 
+    }
+
+    public void showErrorDialog(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getActivity());
+        alertDialogBuilder.setMessage("Please enable GPS or input a location")
+                .setCancelable(true)
+                .setPositiveButton("Ok",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
     }
 
     //Show popup to ask for gps enabling
@@ -218,11 +244,11 @@ public class SearchFrag extends Fragment {
     }
 
     public void savePreferences(String key, String value){
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("switchData", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("searchFragData", MODE_PRIVATE);
         SharedPreferences.Editor prefEditor = sharedPreferences.edit();
         prefEditor.putString(key, value);
         prefEditor.commit();
-        System.out.println(sharedPreferences.getString("switchValue", "") + "SEARCHFRAGSWITCHVALUE");
+        System.out.println(sharedPreferences.getString("inputLocID", ""));
     }
 
     public static void hideKeyboard(Context ctx) {
