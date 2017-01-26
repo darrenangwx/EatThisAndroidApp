@@ -24,7 +24,7 @@ public class AdvSearchActivity extends Activity implements View.OnClickListener 
         Spinner ratingspinner = (Spinner) findViewById(R.id.ratingspinner);
 
         SharedPreferences sharedPref = getSharedPreferences("SpinnerData",MODE_PRIVATE);
-        String restaurant = sharedPref.getString("crusine","");
+        String restaurant = sharedPref.getString("cusine","");
         String rating = sharedPref.getString("rating","");
 
 
@@ -43,11 +43,11 @@ public class AdvSearchActivity extends Activity implements View.OnClickListener 
                 Spinner restaurantspinner = (Spinner)findViewById(R.id.restaurantspinner);
                 Spinner ratingspinner = (Spinner) findViewById(R.id.ratingspinner);
 
-                String crusine = restaurantspinner.getSelectedItem().toString();
+                String cusine = restaurantspinner.getSelectedItem().toString();
                 String rating = ratingspinner.getSelectedItem().toString();
                 SharedPreferences sharedPref = getSharedPreferences("SpinnerData",0);
                 SharedPreferences.Editor prefEditor = sharedPref.edit();
-                prefEditor.putString("crusine",crusine);
+                prefEditor.putString("cusine",cusine);
                 prefEditor.putString("rating",rating);
                 prefEditor.commit();
 

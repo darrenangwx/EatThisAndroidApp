@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -31,6 +32,7 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
+import static android.content.Context.MODE_PRIVATE;
 import static com.google.android.gms.wearable.DataMap.TAG;
 
 /**
@@ -44,6 +46,7 @@ public class SearchFrag extends Fragment {
     CheckBox checkBox;
     Button buttonGo;
     LocationManager locationManager;
+    String switchValue;
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
 
     @Nullable
@@ -57,6 +60,7 @@ public class SearchFrag extends Fragment {
         //for text box
         editText = (EditText) v.findViewById(R.id.editText5);
         editText.setVisibility(View.VISIBLE);
+        savePreferences("switchValue", "0");
 
         //for find food near me switch
         switchffnm = (Switch) v.findViewById(R.id.switchffnm);
@@ -108,11 +112,11 @@ public class SearchFrag extends Fragment {
         buttonGo.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Fragment fragment = new MapViewFrag();
+                Fragment fragment = new LoadingFrag();
                 replaceFragment(fragment);
+                //TODO need a better way to hide keyboard
                 hideKeyboard(getContext());
-
-
+                //TODO check if gps is enabled again, if disabled but switch enabled, turn switch off
 
             }
         });
@@ -169,7 +173,9 @@ public class SearchFrag extends Fragment {
         if(((Switch)view).isChecked()){
             editText.setVisibility(View.INVISIBLE);
             locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-
+            //setting switchValue to true and putting it inside shared pref
+            switchValue = "1";
+            savePreferences("switchValue", switchValue);
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
                 Toast.makeText(this.getActivity(), "Using GPS", Toast.LENGTH_SHORT).show();
 
@@ -178,6 +184,9 @@ public class SearchFrag extends Fragment {
             }
         } else{
             editText.setVisibility(View.VISIBLE);
+            //setting switchValue to false and putting it inside shared pref
+            switchValue = "0";
+            savePreferences("switchValue", switchValue);
         }
 
     }
@@ -208,6 +217,13 @@ public class SearchFrag extends Fragment {
         alert.show();
     }
 
+    public void savePreferences(String key, String value){
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("switchData", MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = sharedPreferences.edit();
+        prefEditor.putString(key, value);
+        prefEditor.commit();
+        System.out.println(sharedPreferences.getString("switchValue", "") + "SEARCHFRAGSWITCHVALUE");
+    }
 
     public static void hideKeyboard(Context ctx) {
         InputMethodManager inputManager = (InputMethodManager) ctx
