@@ -1,5 +1,7 @@
 package com.mds.eatthis;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
@@ -17,6 +19,10 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -28,22 +34,31 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Locale;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
+import static com.mds.eatthis.AppConfig.*;
+
 
 public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private ProgressBar spinner;
     int switchValue;
     String locationID;
     String currentLatitude, currentLongtitude;
+    private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
+    private static final boolean PRINT_AS_STRING = false;
 
     //TODO: what is nullable
     @Nullable
@@ -75,24 +90,6 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
             locationID = sharedPreferences.getString("inputLocID", "");
         }
 
-
-        /*else{
-            String mylocation = sharedPreferences.getString("inputLocName", "");
-            Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-            try {
-                List<Address> addresses = geocoder.getFromLocationName(mylocation, 1);
-                System.out.println(addresses);
-                Address address = addresses.get(0);
-                currentLatitude = Double.toString(address.getLatitude());
-                currentLongtitude = Double.toString(address.getLongitude());
-                savePreferences("cLat", currentLatitude);
-                savePreferences("cLng", currentLongtitude);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }*/
-
         return v;
     }
 
@@ -108,13 +105,6 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     public void onStart(){
         super.onStart();
         mGoogleApiClient.connect();
-    }
-
-    //replace fragment when button is clicked
-    public void replaceFragment(Fragment fragment){
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.content_frame, fragment);
-        ft.commit();
     }
 
     @Override
@@ -139,9 +129,12 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                             currentLongtitude = Double.toString(gotLocation.longitude);
                             savePreferences("cLat", currentLatitude);
                             savePreferences("cLng", currentLongtitude);
+                            //After lat and lng stored in preferences, get nearby places
+                            loadNearByPlaces(gotLocation.latitude, gotLocation.longitude);
                             //After lat and lng stored in preferences, replace fragment
-                            Fragment fragment = new MapViewFrag();
-                            replaceFragment(fragment);
+                            //TODO fragment replacing here
+                            /*Fragment fragment = new MapViewFrag();
+                            replaceFragment(fragment);*/
                             Log.i(TAG, "Place found: " + myPlace.getName());
                         } else {
                             Log.e(TAG, "Place not found");
@@ -149,6 +142,92 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                         places.release();
                     }
                 });
+    }
+
+    private void loadNearByPlaces(double latitude, double longitude) {
+        String type = "restaurant";
+        StringBuilder googlePlacesUrl =
+                new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        googlePlacesUrl.append("location=").append(latitude).append(",").append(longitude);
+        googlePlacesUrl.append("&radius=").append(PROXIMITY_RADIUS);
+        googlePlacesUrl.append("&types=").append(type);
+        googlePlacesUrl.append("&sensor=false");
+        googlePlacesUrl.append("&key=" + GOOGLE_BROWSER_API_KEY);
+
+        JsonObjectRequest request = new JsonObjectRequest( googlePlacesUrl.toString(),null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject result) {
+
+                        Log.i(TAG, "onResponse: Result= " + result.toString());
+                        try{
+                            //check if there are any nearby restaurants being returned
+                            if(result.getString(STATUS).equalsIgnoreCase(OK)){
+                                System.out.println("INSIDE ONRESPONSE");
+
+                                System.out.println(result.getJSONArray("results"));
+
+                                //Send the JSONObject with the nearby places to MapViewFrag
+                                Bundle args = new Bundle();
+                                Fragment fragment = new MapViewFrag();
+                                String nearbyPlaces = result.toString();
+                                args.putString("nearbyPlaces", nearbyPlaces);
+                                fragment.setArguments(args);
+                                replaceFragment(fragment);
+
+                            }else if(result.getString(STATUS).equalsIgnoreCase(ZERO_RESULTS)){
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoadingFrag.this.getActivity());
+                                alertDialogBuilder.setMessage("No nearby restaurants found")
+                                        .setCancelable(false)
+                                        .setPositiveButton("Ok",
+                                                new DialogInterface.OnClickListener(){
+                                                    public void onClick(DialogInterface dialog, int id){
+                                                        //send user back to Search fragment
+                                                        Fragment fragment =  new SearchFrag();
+                                                        replaceFragment(fragment);
+                                                    }
+                                                });
+                                AlertDialog alert = alertDialogBuilder.create();
+                                alert.show();
+                            }
+                        }catch(JSONException e){
+                            e.printStackTrace();
+                        }
+
+                        /*try{
+                            System.out.println("INSIDE ONRESPONSE");
+
+                            System.out.println(result.getJSONArray("results"));
+
+                            //Send the JSONObject with the nearby places to MapViewFrag
+                            Bundle args = new Bundle();
+                            Fragment fragment = new MapViewFrag();
+                            String nearbyPlaces = result.toString();
+                            args.putString("nearbyPlaces", nearbyPlaces);
+                            fragment.setArguments(args);
+                            replaceFragment(fragment);
+
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }*/
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "onErrorResponse: Error= " + error);
+                        Log.e(TAG, "onErrorResponse: Error= " + error.getMessage());
+                    }
+                });
+
+        System.out.println(request + "REQUEST RIGHT HERE");
+        AppController.getInstance().addToRequestQueue(request);
+    }
+
+    //replace fragment when button is clicked
+    public void replaceFragment(Fragment fragment){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.content_frame, fragment);
+        ft.commit();
     }
 
     //request for location updates
@@ -187,9 +266,8 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         savePreferences("cLat", currentLatitude);
         savePreferences("cLng", currentLongtitude);
-        //After lat and lng stored in preferences, replace fragment
-        Fragment fragment = new MapViewFrag();
-        replaceFragment(fragment);
+        //After lat and lng stored in preferences, get nearby places
+        loadNearByPlaces(location.getLatitude(), location.getLongitude());
 
     }
 
