@@ -35,7 +35,8 @@ public final class AppConfig {
     public static final String GOOGLE_BROWSER_API_KEY =
             "AIzaSyCO4NSMZ1u7SGC4pmBO9bqSdaNRrzJuCoE";
     public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    public static final int PROXIMITY_RADIUS = 500;
+    //TODO change radius
+    public static final int PROXIMITY_RADIUS = 350;
     // The minimum distance to change Updates in meters
     //TODO remove this maybe
     /*public static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters

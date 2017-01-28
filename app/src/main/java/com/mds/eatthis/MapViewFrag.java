@@ -165,12 +165,14 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             JSONArray jsonArray = result.getJSONArray("results");
             Random rand = new Random();
             if(newPlace == 9000){
-                newPlace = rand.nextInt((jsonArray.length() - 10) - 0) + 0; //only use first 10 results
+                newPlace = rand.nextInt(jsonArray.length() - 0) + 0;
                 oldPlace = newPlace;
             }else{
                 //make sure new place generated is a not the same as the previous one
-                while(newPlace == oldPlace){
-                    newPlace = rand.nextInt((jsonArray.length() - 10) - 0) + 0; //only use first 10 results
+                if(jsonArray.length() != 1){ //if there is more than 1 place switch restaurant
+                    while(newPlace == oldPlace){
+                        newPlace = rand.nextInt(jsonArray.length() - 0) + 0;
+                    }
                 }
                 oldPlace = newPlace;
             }
@@ -195,7 +197,11 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             builder.include(latLngUserLoc);
             builder.include(latLngNearbyPlace);
             LatLngBounds bounds = builder.build();
-            gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,150));
+            //use device screen to get map padding
+            int width = getResources().getDisplayMetrics().widthPixels;
+            int height = getResources().getDisplayMetrics().heightPixels;
+            int padding = (int) (width * 0.20);
+            gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,width,height,padding));
 
         }catch(JSONException e){
             e.printStackTrace();
