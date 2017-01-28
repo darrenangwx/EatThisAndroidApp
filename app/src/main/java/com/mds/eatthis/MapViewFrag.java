@@ -9,7 +9,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -52,9 +54,10 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     private TextView address;
     int testid = 1;
     JSONObject result;
-    //set random number to new place
-    int newPlace = 9000;
+    int newPlace = 9000; //A random number as long as is not 20 or below as JSONArray returns 20 or less results
     int oldPlace;
+    LatLng latLngUserLoc;
+    LatLng latLngNearbyPlace;
 
     double currentLatitude, currentLongtitude;
 
@@ -145,11 +148,11 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         currentLongtitude = Double.parseDouble(sharedPreferences.getString("cLng", ""));
         System.out.println(currentLatitude + currentLongtitude + "latlonginmapready");
         // Add a marker in user's coordinates and move the camera
-        LatLng latLng = new LatLng(currentLatitude, currentLongtitude);
-        MarkerOptions option = new MarkerOptions().position(latLng).title("You are here");
-        gMap.addMarker(option);
-        float zoomlevel = (float) 15.0;
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomlevel));
+        latLngUserLoc = new LatLng(currentLatitude, currentLongtitude);
+        MarkerOptions option = new MarkerOptions().position(latLngUserLoc).title("You are here");
+        Marker userLocMarker = gMap.addMarker(option);
+        userLocMarker.showInfoWindow();
+
         //start plotting nearby place
         parseLocationResult(result);
     }
@@ -162,15 +165,16 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             JSONArray jsonArray = result.getJSONArray("results");
             Random rand = new Random();
             if(newPlace == 9000){
-                newPlace = rand.nextInt(jsonArray.length() - 0) + 0;
+                newPlace = rand.nextInt((jsonArray.length() - 10) - 0) + 0; //only use first 10 results
                 oldPlace = newPlace;
             }else{
                 //make sure new place generated is a not the same as the previous one
                 while(newPlace == oldPlace){
-                    newPlace = rand.nextInt(jsonArray.length() - 0) + 0;
+                    newPlace = rand.nextInt((jsonArray.length() - 10) - 0) + 0; //only use first 10 results
                 }
                 oldPlace = newPlace;
             }
+            System.out.println(newPlace);
             JSONObject place = jsonArray.getJSONObject(newPlace);
             placeName = place.getString(NAME);
             vicinity = place.getString(VICINITY);
@@ -180,11 +184,18 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             address.setText(vicinity);
 
             MarkerOptions markerOptions = new MarkerOptions();
-            LatLng latLng = new LatLng(placeLatitude, placeLongitude);
-            markerOptions.position(latLng);
-            markerOptions.title(placeName + " : " + vicinity);
-            markerOptions.visible(true);
+            latLngNearbyPlace = new LatLng(placeLatitude, placeLongitude);
+            markerOptions.position(latLngNearbyPlace);
+            markerOptions.title(placeName);
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.eticon));
             gMap.addMarker(markerOptions);
+
+            //After markers for both location are set, set the boundary using the markers as reference so that both markers are being shown on the map properly
+            LatLngBounds.Builder builder= new LatLngBounds.Builder();
+            builder.include(latLngUserLoc);
+            builder.include(latLngNearbyPlace);
+            LatLngBounds bounds = builder.build();
+            gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,150));
 
         }catch(JSONException e){
             e.printStackTrace();

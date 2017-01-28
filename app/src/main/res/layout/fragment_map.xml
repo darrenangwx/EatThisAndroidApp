@@ -5,7 +5,6 @@
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--TODO add name and address dynamically-->
     <TextView
         android:id="@+id/restaurant"
         android:layout_width="match_parent"

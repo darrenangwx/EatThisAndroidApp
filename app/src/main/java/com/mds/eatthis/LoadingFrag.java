@@ -132,9 +132,6 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                             //After lat and lng stored in preferences, get nearby places
                             loadNearByPlaces(gotLocation.latitude, gotLocation.longitude);
                             //After lat and lng stored in preferences, replace fragment
-                            //TODO fragment replacing here
-                            /*Fragment fragment = new MapViewFrag();
-                            replaceFragment(fragment);*/
                             Log.i(TAG, "Place found: " + myPlace.getName());
                         } else {
                             Log.e(TAG, "Place not found");
