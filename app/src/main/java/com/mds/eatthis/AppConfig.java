@@ -31,6 +31,7 @@ public final class AppConfig {
     public static final String VICINITY = "vicinity";
     public static final String PLACE_NAME = "place_name";
 
+
     // remember to change the browser api key
     public static final String GOOGLE_BROWSER_API_KEY =
             "AIzaSyCO4NSMZ1u7SGC4pmBO9bqSdaNRrzJuCoE";

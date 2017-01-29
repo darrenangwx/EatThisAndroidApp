@@ -1,5 +1,8 @@
 package com.mds.eatthis;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -70,7 +73,8 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     private TextView restaurant;
     private TextView address;
     int testid = 1;
-    JSONObject result;
+    JSONObject nearbyPlaceResult;
+
     int newPlace = 9000; //A random number as long as is not 20 or below as JSONArray returns 20 or less results
     int oldPlace;
     LatLng latLngUserLoc;
@@ -103,7 +107,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         //getting nearby places from loadingfrag
         String nearbyPlaces = getArguments().getString("nearbyPlaces");
         try {
-            result = new JSONObject(nearbyPlaces);
+            nearbyPlaceResult = new JSONObject(nearbyPlaces);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -175,23 +179,23 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         userLocMarker.showInfoWindow();
 
         //start plotting nearby place
-        parseLocationResult(result);
+        parseLocationResult(nearbyPlaceResult);
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                //open google maps
                 showDirections(currentLatitude,currentLongtitude,placeLatitude,placeLongitude);
             }
         });
     }
 
 
-    private void parseLocationResult(JSONObject result){
-
+    private void parseLocationResult(JSONObject nearbyPlaceResult){
         String placeName, vicinity;
 
         try {
-            JSONArray jsonArray = result.getJSONArray("results");
+            JSONArray jsonArray = nearbyPlaceResult.getJSONArray("results");
             Random rand = new Random();
             if(newPlace == 9000){
                 newPlace = rand.nextInt(jsonArray.length() - 0) + 0;
@@ -219,26 +223,11 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             markerOptions.position(latLngNearbyPlace);
             markerOptions.title(placeName);
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.eticon));
+            //add marker on nearby place
             gMap.addMarker(markerOptions);
 
-            //After markers for both location are set, set the boundary using the markers as reference so that both markers are being shown on the map properly
-            LatLngBounds.Builder builder= new LatLngBounds.Builder();
-            builder.include(latLngUserLoc);
-            builder.include(latLngNearbyPlace);
-            LatLngBounds bounds = builder.build();
-
-            //use device screen to get map padding
-            int width = getResources().getDisplayMetrics().widthPixels;
-            int height = getResources().getDisplayMetrics().heightPixels;
-            int padding = (int) (width * 0.20);
-
-            gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,width,height,padding));
-
-            String url = getDirectionsUrl(latLngUserLoc,latLngNearbyPlace);
-
-            DownloadTask downloadTask = new DownloadTask();
-
-            downloadTask.execute(url);
+            //get directions from user location to nearby place
+            getDirections(latLngUserLoc,latLngNearbyPlace);
 
         }catch(JSONException e){
             e.printStackTrace();
@@ -247,7 +236,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     }
 
     public void showDirections(double lat, double lng, double lat1, double lng1) {
-
         final Intent intent = new
                 Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?" +
                 "saddr=" + lat + "," + lng + "&daddr=" + lat1 + "," +
@@ -257,152 +245,97 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
     }
 
-    private String getDirectionsUrl(LatLng origin,LatLng dest){
+    private void getDirections(LatLng origin,LatLng dest){
+        StringBuilder googleDirectionsUrl =
+                new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?");
+        googleDirectionsUrl.append("origin=").append(origin.latitude+",").append(origin.longitude);
+        googleDirectionsUrl.append("&destination=").append(dest.latitude+",").append(dest.longitude);
+        googleDirectionsUrl.append("&sensor=false");
+        googleDirectionsUrl.append("&mode=walking");
+        //For testing
+        System.out.println(googleDirectionsUrl.toString());
 
-        // Origin of route
-        String str_origin = "origin="+origin.latitude+","+origin.longitude;
+        JsonObjectRequest request = new JsonObjectRequest(googleDirectionsUrl.toString() ,null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject result) {
 
-        // Destination of route
-        String str_dest = "destination="+dest.latitude+","+dest.longitude;
+                        Log.i(TAG, "onResponse: Result= " + result.toString());
+                        try{
+                            //TODO remove if else
+                            if(result.getString(STATUS).equalsIgnoreCase(OK)){
+                                System.out.println("INSIDE getDirectionsURL");
 
-        // Set sensor to enable or not
-        String sensor = "sensor=false";
+                                //start parsing directions
+                                parsePolyLine(result);
 
-        //Walking mode
-        String mode = "mode=walking";
-
-        // Building the parameters to the web service
-        String parameters = str_origin+"&"+str_dest+"&"+sensor+"&"+mode;
-
-        // Output format
-        String output = "json";
-
-        String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
-
-        return url;
+                            }else if(result.getString(STATUS).equalsIgnoreCase(ZERO_RESULTS)){
+                                //TODO do something
+                            }
+                        }catch(JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "onErrorResponse: Error= " + error);
+                        Log.e(TAG, "onErrorResponse: Error= " + error.getMessage());
+                    }
+                });
+        AppController.getInstance().addToRequestQueue(request);
     }
 
-    private String downloadUrl(String strUrl) throws IOException {
-        String data = "";
-        InputStream iStream = null;
-        HttpURLConnection urlConnection = null;
-        try{
-            URL url = new URL(strUrl);
+    private void parsePolyLine(JSONObject polyLineResult){
+        System.out.println("in parsepolyline " + polyLineResult);
 
-            urlConnection = (HttpURLConnection) url.openConnection();
+        List<List<HashMap<String, String>>> routes = null;
+        ArrayList<LatLng> points = null;
+        PolylineOptions lineOptions = null;
 
-            // Connecting to url
-            urlConnection.connect();
+        JSONParser parser = new JSONParser();
+        // Starts parsing data
+        routes = parser.parse(polyLineResult);
+        // Traversing through all the routes
+        for(int i=0;i<routes.size();i++){
+            points = new ArrayList<LatLng>();
+            lineOptions = new PolylineOptions();
 
-            // Reading data from url
-            iStream = urlConnection.getInputStream();
+            // Fetching i-th route
+            List<HashMap<String, String>> path = routes.get(i);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+            // Fetching all the points in i-th route
+            for(int j=0;j<path.size();j++){
+                HashMap<String,String> point = path.get(j);
 
-            StringBuffer sb  = new StringBuffer();
+                double lat = Double.parseDouble(point.get("lat"));
+                double lng = Double.parseDouble(point.get("lng"));
+                LatLng position = new LatLng(lat, lng);
 
-            String line = "";
-            while( ( line = br.readLine())  != null){
-                sb.append(line);
+                points.add(position);
             }
 
-            data = sb.toString();
-
-            br.close();
-
-        }catch(Exception e){
-            Log.d("Exception while downloading url", e.toString());
-        }finally{
-            iStream.close();
-            urlConnection.disconnect();
-        }
-        return data;
-    }
-
-    private class DownloadTask extends AsyncTask<String, Void, String> {
-
-        // Downloading data in non-ui thread
-        @Override
-        protected String doInBackground(String... url) {
-
-            // For storing data from web service
-            String data = "";
-
-            try{
-                // Fetching the data from web service
-                data = downloadUrl(url[0]);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
-            }
-            return data;
+            // Adding all the points in the route to LineOptions
+            lineOptions.addAll(points);
+            lineOptions.width(20);
+            lineOptions.color(getContext().getResources().getColor(R.color.linecolor));
         }
 
-        // Executes in UI thread, after the execution of
-        // doInBackground()
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
+        // Drawing polyline in the Google Map for the i-th route
+        gMap.addPolyline(lineOptions);
+        
+        //After everything is set, set the boundary using the markers and polyline as reference so that everything can be shown on the map
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
-            ParserTask parserTask = new ParserTask();
-
-            // Invokes the thread for parsing the JSON data
-            parserTask.execute(result);
+        for(LatLng point : points){
+            builder.include(point);
         }
-    }
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>>>{
+        builder.include(latLngUserLoc);
+        builder.include(latLngNearbyPlace);
 
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+        LatLngBounds bounds = builder.build();
+        gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,150));
 
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try{
-                jObject = new JSONObject(jsonData[0]);
-                JSONParser parser = new JSONParser();
-
-                // Starts parsing data
-                routes = parser.parse(jObject);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList<LatLng> points = null;
-            PolylineOptions lineOptions = null;
-            MarkerOptions markerOptions = new MarkerOptions();
-
-            // Traversing through all the routes
-            for(int i=0;i<result.size();i++){
-                points = new ArrayList<LatLng>();
-                lineOptions = new PolylineOptions();
-
-                // Fetching i-th route
-                List<HashMap<String, String>> path = result.get(i);
-
-                // Fetching all the points in i-th route
-                for(int j=0;j<path.size();j++){
-                    HashMap<String,String> point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    points.add(position);
-                }
-
-                // Adding all the points in the route to LineOptions
-                lineOptions.addAll(points);
-                lineOptions.width(20);
-                lineOptions.color(Color.BLUE);
-            }
-
-            // Drawing polyline in the Google Map for the i-th route
-            gMap.addPolyline(lineOptions);
-        }
     }
 
 }
