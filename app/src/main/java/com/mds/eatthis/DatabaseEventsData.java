@@ -23,7 +23,7 @@ public class DatabaseEventsData extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " +TABLE_NAME+
                 " (" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + RestaurantName +
-                " INTEGER," +RestaurantLocation+" TEXT NOT NULL);");
+                " TEXT," +RestaurantLocation+" TEXT NOT NULL);");
     }
 
     @Override

@@ -60,6 +60,8 @@ import java.util.Random;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 import static com.mds.eatthis.AppConfig.*;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLong;
 import static com.mds.eatthis.R.id.map;
 
 //db Stuff
@@ -82,6 +84,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     private Button changeRestaurant;
     private TextView restaurant;
     private TextView address;
+    String placeName, vicinity;
 
     int testid = 1;
     JSONObject nearbyPlaceResult;
@@ -141,8 +144,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         heartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              //  System.out.println(RestaurantName);
-               // System.out.println(RestaurantLocation);
 
                 if(testid == 1){
                     //Check if database is created
@@ -152,7 +153,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                         //insert restaurant name and location into database
                         locationdetails = new DatabaseEventsData(MapViewFrag.this.getActivity());
                         try{
-                            addEvent(RestaurantName1, RestaurantLocation1);
+                            addEvent(placeName, vicinity);
 
                             Toast.makeText(MapViewFrag.this.getActivity(),"Added to favourites", Toast.LENGTH_SHORT).show();
                             heartButton.setBackgroundResource(R.drawable.favourited);
@@ -188,18 +189,34 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     }
 
     private void addEvent(String resName, String resLocation) {
-        SQLiteDatabase db = locationdetails.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(RestaurantName, resName);
-        values.put(RestaurantLocation, resLocation);
-        db.insertOrThrow(TABLE_NAME, null, values);
+        //wanted to check if record alr fav
+        /*Cursor cursor = getEvents();
+
+        while (cursor.moveToNext()){
+            String RestName = cursor.getString(1);
+            String RestLocation = cursor.getString(2);
+
+            if(RestName==resName&&RestLocation==resLocation){
+                break;
+            } else {*/
+                SQLiteDatabase db = locationdetails.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                values.put(RestaurantName, resName);
+                values.put(RestaurantLocation, resLocation);
+                //values.put(RestaurantLat, placeLatitude);
+               // values.put(RestaurantLong, placeLongitude);
+                db.insertOrThrow(TABLE_NAME, null, values);
+        /*    }
+        }*/
+
     }
 
-    public Cursor getEvents(){
+    private Cursor getEvents(){
         SQLiteDatabase db = locationdetails.getReadableDatabase();
         Cursor cursor = db.query(TABLE_NAME, FROM, null, null, null, null, ORDER_BY);
         return cursor;
     }
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -245,7 +262,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
 
     private void parseLocationResult(JSONObject nearbyPlaceResult){
-        String placeName, vicinity;
+
 
         try {
             JSONArray jsonArray = nearbyPlaceResult.getJSONArray("results");
@@ -272,7 +289,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             address.setText(vicinity);
             RestaurantName1 = placeName;
             RestaurantLocation1 = vicinity;
-       //     Cursor cursor = getEvents();
+            //Cursor cursor = getEvents();
             // Function getEvents is returning a null value;
 
 

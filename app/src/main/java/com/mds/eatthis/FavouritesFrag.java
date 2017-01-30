@@ -16,12 +16,15 @@ import android.widget.TextView;
 
 //db Stuff
 import static android.provider.BaseColumns._ID;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 import static com.mds.eatthis.DatabaseConstants.RestaurantName;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLocation;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -39,10 +42,10 @@ public class FavouritesFrag extends Fragment {
 
     private static String[] FROM =
             {_ID, DatabaseConstants.RestaurantName, DatabaseConstants.RestaurantLocation};
-    private static String ORDER_BY = DatabaseConstants.RestaurantName + " DESC";
+    private static String ORDER_BY = DatabaseConstants._ID + " ASC";
     private DatabaseEventsData locationdetails;
 
-
+    TextView text;
     ListView list;
 
     @Nullable
@@ -51,17 +54,38 @@ public class FavouritesFrag extends Fragment {
         //returning our layout file
         //change R.layout.yourlayoutfilename for each of your fragments
         View v = inflater.inflate(R.layout.fragment_menu_favourites, container, false);
+        text = (TextView) v.findViewById(R.id.textabc);
 
-        list = (ListView) v.findViewById(R.id.listView);
-        list.setAdapter(new VivzAdapter(FavouritesFrag.this.getActivity()));
-
+        locationdetails = new DatabaseEventsData(getActivity());
+        try{
+            Cursor cursor = getEvents();
+            showEvents(cursor);
+        }finally {
+            locationdetails.close();
+        }
         return v;
     }
-    public Cursor getEvents(){
+    private Cursor getEvents(){
         SQLiteDatabase db = locationdetails.getReadableDatabase();
         Cursor cursor = db.query(TABLE_NAME, FROM, null, null, null, null, ORDER_BY);
         return cursor;
     }
+
+    private void showEvents(Cursor cursor){
+        StringBuilder builder = new StringBuilder();
+        while (cursor.moveToNext()){
+            long id = cursor.getLong(0);
+            String RestaurantName = cursor.getString(1);
+            String RestaurantLocation = cursor.getString(2);
+            builder.append(id).append(": ");
+            builder.append(RestaurantName).append("\n");
+            builder.append(RestaurantLocation).append("\n");
+        }
+
+        text.setText(builder);
+    }
+
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -70,6 +94,7 @@ public class FavouritesFrag extends Fragment {
         getActivity().setTitle("Favourites");
     }
 }
+/*
 class SingleRow
 {
     String title;
@@ -92,7 +117,8 @@ class VivzAdapter extends BaseAdapter {
         String[] description = res.getStringArray(R.array.description);
 
         FavouritesFrag cls = new FavouritesFrag();
-/*        Cursor cursor = cls.getEvents();
+        */
+/*Cursor cursor = cls.getEvents();
         while(cursor.moveToNext()){
             String resName = cursor.getString(1);
             String resLocation = cursor.getString(2);
@@ -100,7 +126,8 @@ class VivzAdapter extends BaseAdapter {
             System.out.println(resName);
             System.out.println(resLocation);
             System.out.println(resLocation);
-        }*/
+        }*//*
+
 
         for (int i = 0; i < 5; i++) {
             list.add(new SingleRow(titles[i], description[i]));
@@ -128,7 +155,7 @@ class VivzAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.rows_favourites, viewGroup, false);
+        View row = inflater.inflate(R.layout.fragment_menu_favourites, viewGroup, false);
         TextView title = (TextView) row.findViewById(R.id.textView);
         TextView description = (TextView) row.findViewById(R.id.textView2);
 
@@ -139,4 +166,4 @@ class VivzAdapter extends BaseAdapter {
 
         return row;
     }
-}
+}*/
