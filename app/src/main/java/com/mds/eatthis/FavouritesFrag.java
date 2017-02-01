@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 //db Stuff
+import static android.R.id.list;
 import static android.provider.BaseColumns._ID;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 import static com.mds.eatthis.DatabaseConstants.RestaurantName;
@@ -26,6 +27,7 @@ import android.database.sqlite.SQLiteDatabase;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 
@@ -43,6 +45,9 @@ public class FavouritesFrag extends Fragment {
     private DatabaseEventsData locationdetails;
 
     TextView text;
+    ListView list;
+    static String[] arrayresname;
+    static String[] arrayresloc;
 
     @Nullable
     @Override
@@ -50,7 +55,7 @@ public class FavouritesFrag extends Fragment {
         //returning our layout file
         //change R.layout.yourlayoutfilename for each of your fragments
         View v = inflater.inflate(R.layout.fragment_menu_favourites, container, false);
-        text = (TextView) v.findViewById(R.id.textabc);
+       /* text = (TextView) v.findViewById(R.id.textabc);*/
 
         locationdetails = new DatabaseEventsData(getActivity());
         try{
@@ -59,15 +64,17 @@ public class FavouritesFrag extends Fragment {
         }finally {
             locationdetails.close();
         }
+        list = (ListView) v.findViewById(R.id.listView);
+        list.setAdapter(new VivzAdapter(FavouritesFrag.this.getActivity()));
         return v;
     }
-    private Cursor getEvents(){
+    public Cursor getEvents(){
         SQLiteDatabase db = locationdetails.getReadableDatabase();
         Cursor cursor = db.query(TABLE_NAME, FROM, null, null, null, null, ORDER_BY);
         return cursor;
     }
 
-    private void showEvents(Cursor cursor){
+/*    private void showEvents(Cursor cursor){
         StringBuilder builder = new StringBuilder();
         while (cursor.moveToNext()){
             String RestaurantName = cursor.getString(1);
@@ -77,6 +84,33 @@ public class FavouritesFrag extends Fragment {
         }
 
         text.setText(builder);
+    }*/
+        private void showEvents(Cursor cursor){
+            arrayresname = new String[cursor.getCount()];
+            arrayresloc = new String[cursor.getCount()];
+            int o = 0;
+            while(cursor.moveToNext()){
+                String allfavresname = cursor.getString(cursor.getColumnIndex("RestaurantName"));
+                String allfavresloc = cursor.getString(cursor.getColumnIndex("RestaurantLocation"));
+                arrayresname[o] = allfavresname;
+                arrayresloc[o] = allfavresloc;
+                o++;
+            }
+
+/*        StringBuilder builder = new StringBuilder();
+        while (cursor.moveToNext()){
+            String RestaurantName = cursor.getString(1);
+            String RestaurantLocation = cursor.getString(2);
+            builder.append(RestaurantName).append("\n");
+            builder.append(RestaurantLocation).append("\n\n");*/
+        }
+    public static String[] returnArrayname()
+    {
+        return(arrayresname);
+    }
+    public static String[] returnArraylocation()
+    {
+        return(arrayresloc);
     }
 
 
@@ -88,7 +122,7 @@ public class FavouritesFrag extends Fragment {
         getActivity().setTitle("Favourites");
     }
 }
-/*
+
 class SingleRow
 {
     String title;
@@ -107,30 +141,15 @@ class VivzAdapter extends BaseAdapter {
         context = c;
         list = new ArrayList<SingleRow>();
         Resources res = c.getResources();
-        String[] titles = res.getStringArray(R.array.titles);
-        String[] description = res.getStringArray(R.array.description);
+        String[] ArraysofResNames = FavouritesFrag.returnArrayname();
+        String[] ArraysofResLocation = FavouritesFrag.returnArraylocation();
 
-        FavouritesFrag cls = new FavouritesFrag();
-        */
-/*Cursor cursor = cls.getEvents();
-        while(cursor.moveToNext()){
-            String resName = cursor.getString(1);
-            String resLocation = cursor.getString(2);
-            System.out.println(resName);
-            System.out.println(resName);
-            System.out.println(resLocation);
-            System.out.println(resLocation);
-        }*//*
-
-
-        for (int i = 0; i < 5; i++) {
-            list.add(new SingleRow(titles[i], description[i]));
+        for (int i = 0; i < ArraysofResNames.length; i++) {
+            list.add(new SingleRow(ArraysofResNames[i], ArraysofResLocation[i]));
         }
 
     }
-
-
-
+    
     @Override
     public int getCount() {
         return list.size();
@@ -149,7 +168,7 @@ class VivzAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.fragment_menu_favourites, viewGroup, false);
+        View row = inflater.inflate(R.layout.rows_favourites, viewGroup, false);
         TextView title = (TextView) row.findViewById(R.id.textView);
         TextView description = (TextView) row.findViewById(R.id.textView2);
 
@@ -160,4 +179,4 @@ class VivzAdapter extends BaseAdapter {
 
         return row;
     }
-}*/
+}

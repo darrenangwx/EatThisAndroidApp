@@ -37,7 +37,7 @@
         <item>400</item>
         <item>500</item>
     </string-array>
-    <string-array name="titles">
+<!--    <string-array name="titles">
         <item>Amir’s Prata House</item>
         <item>Aqua Seafood Restaurant</item>
         <item>Boutique Cafe</item>
@@ -52,7 +52,7 @@
         <item>20 Milena Walk  #03-12 618721</item>
         <item>25 Jalan Seutan Road #01-31 853628</item>
         <item>Chinatown Street 9 #-02-144 740819</item>
-    </string-array>
+    </string-array>-->
 
     <string name="about_text">Having troubles deciding what to eat? Let this app help you! Switch on your GPS or key in your location and we will choose a suitable place for you to eat nearby. Never will you have to wreck your brains about meals ever again!</string>
 </resources>
