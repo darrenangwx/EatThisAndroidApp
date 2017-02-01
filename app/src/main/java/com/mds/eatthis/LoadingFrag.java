@@ -146,10 +146,10 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
         StringBuilder googlePlacesUrl =
                 new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         googlePlacesUrl.append("location=").append(latitude).append(",").append(longitude);
-        googlePlacesUrl.append("&radius=").append(PROXIMITY_RADIUS);
-        googlePlacesUrl.append("&types=").append(type);
-        googlePlacesUrl.append("&sensor=false");
-        googlePlacesUrl.append("&key=" + GOOGLE_BROWSER_API_KEY);
+        googlePlacesUrl.append("&radius=").append(350); //set radius around location
+        googlePlacesUrl.append("&types=").append(type); //set the type of places to get which is restarant
+        googlePlacesUrl.append("&sensor=false"); //sensor false = not using GPS
+        googlePlacesUrl.append("&key=" + "AIzaSyCO4NSMZ1u7SGC4pmBO9bqSdaNRrzJuCoE"); //set the api key
 
         JsonObjectRequest request = new JsonObjectRequest( googlePlacesUrl.toString(),null,
                 new Response.Listener<JSONObject>() {
@@ -159,7 +159,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                         Log.i(TAG, "onResponse: Result= " + result.toString());
                         try{
                             //check if there are any nearby restaurants being returned
-                            if(result.getString(STATUS).equalsIgnoreCase(OK)){
+                            if(result.getString("status").equalsIgnoreCase("OK")){
                                 System.out.println("INSIDE ONRESPONSE");
 
                                 System.out.println(result.getJSONArray("results"));
@@ -172,7 +172,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                                 fragment.setArguments(args);
                                 replaceFragment(fragment);
 
-                            }else if(result.getString(STATUS).equalsIgnoreCase(ZERO_RESULTS)){
+                            }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoadingFrag.this.getActivity());
                                 alertDialogBuilder.setMessage("No nearby restaurants found")
                                         .setCancelable(false)
@@ -190,23 +190,6 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                         }catch(JSONException e){
                             e.printStackTrace();
                         }
-
-                        /*try{
-                            System.out.println("INSIDE ONRESPONSE");
-
-                            System.out.println(result.getJSONArray("results"));
-
-                            //Send the JSONObject with the nearby places to MapViewFrag
-                            Bundle args = new Bundle();
-                            Fragment fragment = new MapViewFrag();
-                            String nearbyPlaces = result.toString();
-                            args.putString("nearbyPlaces", nearbyPlaces);
-                            fragment.setArguments(args);
-                            replaceFragment(fragment);
-
-                        }catch (JSONException e){
-                            e.printStackTrace();
-                        }*/
                     }
                 },
                 new Response.ErrorListener() {

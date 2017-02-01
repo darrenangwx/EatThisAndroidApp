@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 //db Stuff
 import static android.provider.BaseColumns._ID;
-import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 import static com.mds.eatthis.DatabaseConstants.RestaurantName;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLocation;

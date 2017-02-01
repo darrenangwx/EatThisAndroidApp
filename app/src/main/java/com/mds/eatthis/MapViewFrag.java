@@ -19,16 +19,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Color;
-import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -40,28 +34,17 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
-import static com.mds.eatthis.AppConfig.*;
-import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
-import static com.mds.eatthis.DatabaseConstants.RestaurantLong;
 import static com.mds.eatthis.R.id.map;
 
 //db Stuff
@@ -84,7 +67,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     private Button changeRestaurant;
     private TextView restaurant;
     private TextView address;
-    String placeName, vicinity;
+    String placeName, vicinity, id;
 
     int testid = 1;
     JSONObject nearbyPlaceResult;
@@ -188,36 +171,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         return v;
     }
 
-    private void addEvent(String resName, String resLocation) {
-        //wanted to check if record alr fav
-        /*Cursor cursor = getEvents();
-
-        while (cursor.moveToNext()){
-            String RestName = cursor.getString(1);
-            String RestLocation = cursor.getString(2);
-
-            if(RestName==resName&&RestLocation==resLocation){
-                break;
-            } else {*/
-                SQLiteDatabase db = locationdetails.getWritableDatabase();
-                ContentValues values = new ContentValues();
-                values.put(RestaurantName, resName);
-                values.put(RestaurantLocation, resLocation);
-                //values.put(RestaurantLat, placeLatitude);
-               // values.put(RestaurantLong, placeLongitude);
-                db.insertOrThrow(TABLE_NAME, null, values);
-        /*    }
-        }*/
-
-    }
-
-    private Cursor getEvents(){
-        SQLiteDatabase db = locationdetails.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, FROM, null, null, null, null, ORDER_BY);
-        return cursor;
-    }
-
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -225,16 +178,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         getActivity().setTitle("Map");
     }
 
-    @Override
-    public void onStart(){
-        super.onStart();
-        System.out.println("ONSTART");
-    }
-
-    public void onResume(){
-        super.onResume();
-        System.out.println("ONRESUME");
-    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
@@ -262,8 +205,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
 
     private void parseLocationResult(JSONObject nearbyPlaceResult){
-
-
         try {
             JSONArray jsonArray = nearbyPlaceResult.getJSONArray("results");
             Random rand = new Random();
@@ -281,10 +222,14 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             }
             System.out.println(newPlace);
             JSONObject place = jsonArray.getJSONObject(newPlace);
-            placeName = place.getString(NAME);
-            vicinity = place.getString(VICINITY);
-            placeLatitude = place.getJSONObject(GEOMETRY).getJSONObject(LOCATION).getDouble(LATITUDE);
-            placeLongitude = place.getJSONObject(GEOMETRY).getJSONObject(LOCATION).getDouble(LONGITUDE);
+            placeName = place.getString("name");
+            vicinity = place.getString("vicinity");
+            id = place.getString("place_id");
+            System.out.println("Place id " + id);
+            id = place.getString("id");
+            System.out.println("ID " + id);
+            placeLatitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
+            placeLongitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
             restaurant.setText(placeName);
             address.setText(vicinity);
             RestaurantName1 = placeName;
@@ -338,13 +283,13 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                         Log.i(TAG, "onResponse: Result= " + result.toString());
                         try{
                             //TODO remove if else
-                            if(result.getString(STATUS).equalsIgnoreCase(OK)){
+                            if(result.getString("status").equalsIgnoreCase("OK")){
                                 System.out.println("INSIDE getDirectionsURL");
 
                                 //start parsing directions
                                 parsePolyLine(result);
 
-                            }else if(result.getString(STATUS).equalsIgnoreCase(ZERO_RESULTS)){
+                            }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
                                 //TODO do something
                             }
                         }catch(JSONException e){
@@ -411,6 +356,35 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         LatLngBounds bounds = builder.build();
         gMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,150));
 
+    }
+
+    private void addEvent(String resName, String resLocation) {
+        //wanted to check if record alr fav
+        /*Cursor cursor = getEvents();
+
+        while (cursor.moveToNext()){
+            String RestName = cursor.getString(1);
+            String RestLocation = cursor.getString(2);
+
+            if(RestName==resName&&RestLocation==resLocation){
+                break;
+            } else {*/
+        SQLiteDatabase db = locationdetails.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(RestaurantName, resName);
+        values.put(RestaurantLocation, resLocation);
+        //values.put(RestaurantLat, placeLatitude);
+        // values.put(RestaurantLong, placeLongitude);
+        db.insertOrThrow(TABLE_NAME, null, values);
+        /*    }
+        }*/
+
+    }
+
+    private Cursor getEvents(){
+        SQLiteDatabase db = locationdetails.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_NAME, FROM, null, null, null, null, ORDER_BY);
+        return cursor;
     }
 
 }
