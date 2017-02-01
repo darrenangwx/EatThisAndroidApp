@@ -11,7 +11,7 @@
 
     <string name="Advanced_Search_title">Advance Search</string>
     <string name="Restaurant">Restaurant Crusine</string>
-    <string name="Rating">Rating</string>
+    <string name="Radius">Walking Distance</string>
     <string name="Done">Done</string>>
 
     <string name="search">Search</string>
@@ -24,15 +24,18 @@
     <string-array name="RestaurantPick">
         <item>None</item>
         <item>Chinese</item>
+        <item>Halal</item>
         <item>Japanese</item>
         <item>Thailand</item>
         <item>Western</item>
     </string-array>
-    <string-array name="RatingPick">
+    <string-array name="RadiusPick">
         <item>None</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+        <item>400</item>
+        <item>500</item>
     </string-array>
     <string-array name="titles">
         <item>Amir’s Prata House</item>

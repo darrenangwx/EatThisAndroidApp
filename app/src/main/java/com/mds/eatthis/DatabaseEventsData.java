@@ -1,5 +1,8 @@
 package com.mds.eatthis;
 import static android.provider.BaseColumns._ID;
+import static com.mds.eatthis.DatabaseConstants.PlaceID;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLong;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 import static com.mds.eatthis.DatabaseConstants.RestaurantName;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLocation;
@@ -12,7 +15,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class DatabaseEventsData extends SQLiteOpenHelper{
-    private static final String DATABASE_NAME = "RestaurantDetails";
+    private static final String DATABASE_NAME = "Restaurant_Detail";
     private static final int DATABASE_VERSION = 1;
 
     public DatabaseEventsData(Context context) {
@@ -23,7 +26,7 @@ public class DatabaseEventsData extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " +TABLE_NAME+
                 " (" + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + RestaurantName +
-                " TEXT," +RestaurantLocation+" TEXT NOT NULL);");
+                " TEXT NOT NULL," +RestaurantLocation+" TEXT NOT NULL," +PlaceID+" TEXT NOT NULL,"+RestaurantLat+" REAL NOT NULL,"+RestaurantLong+" REAL NOT NULL);");
     }
 
     @Override

@@ -45,6 +45,9 @@ import java.util.Random;
 
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
+import static com.mds.eatthis.DatabaseConstants.PlaceID;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
+import static com.mds.eatthis.DatabaseConstants.RestaurantLong;
 import static com.mds.eatthis.R.id.map;
 
 //db Stuff
@@ -67,7 +70,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     private Button changeRestaurant;
     private TextView restaurant;
     private TextView address;
-    String placeName, vicinity, id;
+    String placeName, vicinity, placeid, id;
 
     int testid = 1;
     JSONObject nearbyPlaceResult;
@@ -85,7 +88,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     String RestaurantLocation1;
 
     private static String[] FROM =
-            {_ID, DatabaseConstants.RestaurantName, DatabaseConstants.RestaurantLocation};
+            {_ID, DatabaseConstants.RestaurantName, DatabaseConstants.RestaurantLocation, DatabaseConstants.PlaceID, DatabaseConstants.RestaurantLat, DatabaseConstants.RestaurantLong};
     private static String ORDER_BY = DatabaseConstants.RestaurantName + " DESC";
     private DatabaseEventsData locationdetails;
 
@@ -124,19 +127,16 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
 
         heartButton = (ImageButton) v.findViewById(R.id.heartborder);
+
+        locationdetails = new DatabaseEventsData(MapViewFrag.this.getActivity());
+
         heartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if(testid == 1){
-                    //Check if database is created
-                    //if not created:
-                        //Create database here
-                    //else:
-                        //insert restaurant name and location into database
-                        locationdetails = new DatabaseEventsData(MapViewFrag.this.getActivity());
                         try{
-                            addEvent(placeName, vicinity);
+                            addEvent();
 
                             Toast.makeText(MapViewFrag.this.getActivity(),"Added to favourites", Toast.LENGTH_SHORT).show();
                             heartButton.setBackgroundResource(R.drawable.favourited);
@@ -149,6 +149,8 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
                 }else{
                     //delete restaurant name and location from database
+                    removeEvent(placeid);
+
                     Toast.makeText(MapViewFrag.this.getActivity(),"Removed from favourites", Toast.LENGTH_SHORT).show();
                     heartButton.setBackgroundResource(R.drawable.favouriteborder);
                     testid = 1;
@@ -161,13 +163,15 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         changeRestaurant.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                testid = 1;
+                heartButton.setBackgroundResource(R.drawable.favouriteborder);
                 gMap.clear();
                 mMapView.getMapAsync(MapViewFrag.this);
             }
         });
 
 
-
+        locationdetails.close();
         return v;
     }
 
@@ -224,8 +228,8 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             JSONObject place = jsonArray.getJSONObject(newPlace);
             placeName = place.getString("name");
             vicinity = place.getString("vicinity");
-            id = place.getString("place_id");
-            System.out.println("Place id " + id);
+            placeid = place.getString("place_id");
+            System.out.println("Place id " + placeid);
             id = place.getString("id");
             System.out.println("ID " + id);
             placeLatitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
@@ -248,6 +252,13 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
             //get directions from user location to nearby place
             getDirections(latLngUserLoc,latLngNearbyPlace);
+
+            SQLiteDatabase db = locationdetails.getReadableDatabase();
+            Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_NAME+" WHERE PlaceID=\'"+placeid+"\'", null);
+            if(cursor.moveToNext()) {
+                heartButton.setBackgroundResource(R.drawable.favourited);
+                testid = 0;
+            }
 
         }catch(JSONException e){
             e.printStackTrace();
@@ -358,33 +369,29 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
     }
 
-    private void addEvent(String resName, String resLocation) {
+    private void addEvent() {
         //wanted to check if record alr fav
-        /*Cursor cursor = getEvents();
 
-        while (cursor.moveToNext()){
-            String RestName = cursor.getString(1);
-            String RestLocation = cursor.getString(2);
-
-            if(RestName==resName&&RestLocation==resLocation){
-                break;
-            } else {*/
         SQLiteDatabase db = locationdetails.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(RestaurantName, resName);
-        values.put(RestaurantLocation, resLocation);
-        //values.put(RestaurantLat, placeLatitude);
-        // values.put(RestaurantLong, placeLongitude);
-        db.insertOrThrow(TABLE_NAME, null, values);
-        /*    }
-        }*/
+
+            ContentValues values = new ContentValues();
+            values.put(RestaurantName, placeName);
+            values.put(RestaurantLocation, vicinity);
+            values.put(PlaceID, placeid);
+            values.put(RestaurantLat, placeLatitude);
+            values.put(RestaurantLong, placeLongitude);
+            db.insertOrThrow(TABLE_NAME, null, values);
 
     }
 
-    private Cursor getEvents(){
-        SQLiteDatabase db = locationdetails.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, FROM, null, null, null, null, ORDER_BY);
-        return cursor;
+    private void removeEvent(String placeid){
+        SQLiteDatabase db = locationdetails.getWritableDatabase();
+
+        try{
+            db.delete(TABLE_NAME,"PlaceID = ?",new String[]{placeid});
+        }finally {
+            db.close();
+        }
     }
 
 }

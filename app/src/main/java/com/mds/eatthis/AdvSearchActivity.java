@@ -1,6 +1,7 @@
 package com.mds.eatthis;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -21,19 +22,19 @@ public class AdvSearchActivity extends Activity implements View.OnClickListener 
         done.setOnClickListener(this);
 
         Spinner restaurantspinner = (Spinner)findViewById(R.id.restaurantspinner);
-        Spinner ratingspinner = (Spinner) findViewById(R.id.ratingspinner);
+        Spinner radiusspinner = (Spinner) findViewById(R.id.radiusspinner);
 
         SharedPreferences sharedPref = getSharedPreferences("SpinnerData",MODE_PRIVATE);
-        String restaurant = sharedPref.getString("cusine","");
-        String rating = sharedPref.getString("rating","");
+        String restaurant = sharedPref.getString("cuisine","");
+        String radius = sharedPref.getString("radius","");
 
 
         ArrayAdapter myAdapRS = (ArrayAdapter)restaurantspinner.getAdapter();
-        ArrayAdapter myAdapR = (ArrayAdapter)ratingspinner.getAdapter();
+        ArrayAdapter myAdapR = (ArrayAdapter)radiusspinner.getAdapter();
         int spinnerPositionRS = myAdapRS.getPosition(restaurant);
-        int spinnerPositionR = myAdapR.getPosition(rating);
+        int spinnerPositionR = myAdapR.getPosition(radius);
         restaurantspinner.setSelection(spinnerPositionRS);
-        ratingspinner.setSelection(spinnerPositionR);
+        radiusspinner.setSelection(spinnerPositionR);
 
     }
     @Override
@@ -41,14 +42,14 @@ public class AdvSearchActivity extends Activity implements View.OnClickListener 
         switch (v.getId()){
             case R.id.Done:
                 Spinner restaurantspinner = (Spinner)findViewById(R.id.restaurantspinner);
-                Spinner ratingspinner = (Spinner) findViewById(R.id.ratingspinner);
+                Spinner radiusspinner = (Spinner) findViewById(R.id.radiusspinner);
 
-                String cusine = restaurantspinner.getSelectedItem().toString();
-                String rating = ratingspinner.getSelectedItem().toString();
+                String cuisine = restaurantspinner.getSelectedItem().toString();
+                String radius = radiusspinner.getSelectedItem().toString();
                 SharedPreferences sharedPref = getSharedPreferences("SpinnerData",0);
                 SharedPreferences.Editor prefEditor = sharedPref.edit();
-                prefEditor.putString("cusine",cusine);
-                prefEditor.putString("rating",rating);
+                prefEditor.putString("cuisine",cuisine);
+                prefEditor.putString("radius",radius);
                 prefEditor.commit();
 
                 finish();

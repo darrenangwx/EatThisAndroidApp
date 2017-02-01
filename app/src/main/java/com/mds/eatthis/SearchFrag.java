@@ -47,6 +47,7 @@ public class SearchFrag extends Fragment {
     Button buttonGo;
     LocationManager locationManager;
     String switchValue;
+    String checkboxValue;
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
 
     @Nullable
@@ -63,6 +64,7 @@ public class SearchFrag extends Fragment {
 
         //set values back to 0
         savePreferences("switchValue", "0");
+        savePreferences("checkboxValue","0");
         savePreferences("inputLocID","0");
 
         //for find food near me switch
@@ -79,8 +81,14 @@ public class SearchFrag extends Fragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(((CheckBox) view).isChecked()){
+                if(((CheckBox) view).isChecked()) {
+                    checkboxValue = "1";
+                    savePreferences("checkboxValue", checkboxValue);
                     startActivity(new Intent(SearchFrag.this.getActivity(), AdvSearchActivity.class));
+
+                } else {
+                    checkboxValue="0";
+                    savePreferences("checkboxValue",checkboxValue);
                 }
             }
         });
@@ -121,6 +129,7 @@ public class SearchFrag extends Fragment {
                 }else{
                     Fragment fragment = new LoadingFrag();
                     replaceFragment(fragment);
+
                     //TODO maybe not needed anymore cos google autocomplete helped us to it
                     hideKeyboard(getContext());
                 }

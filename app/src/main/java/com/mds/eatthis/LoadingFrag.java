@@ -48,6 +48,7 @@ import java.util.Locale;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 import static com.mds.eatthis.AppConfig.*;
+import static com.mds.eatthis.R.string.advSearch;
 
 
 public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -55,6 +56,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     private LocationRequest mLocationRequest;
     private ProgressBar spinner;
     int switchValue;
+    int checkboxValue;
     String locationID;
     String currentLatitude, currentLongtitude;
     private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
@@ -142,13 +144,26 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     }
 
     private void loadNearByPlaces(double latitude, double longitude) {
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("SpinnerData",MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("searchFragData", MODE_PRIVATE);
+        checkboxValue = Integer.parseInt(sharedPreferences.getString("checkboxValue", ""));
+        String cuisine = sharedPref.getString("cuisine","");
+        String radius = sharedPref.getString("radius","");
+
         String type = "restaurant";
         StringBuilder googlePlacesUrl =
                 new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         googlePlacesUrl.append("location=").append(latitude).append(",").append(longitude);
-        googlePlacesUrl.append("&radius=").append(350); //set radius around location
         googlePlacesUrl.append("&types=").append(type); //set the type of places to get which is restarant
         googlePlacesUrl.append("&sensor=false"); //sensor false = not using GPS
+        if(checkboxValue==1&&!cuisine.equals("None")){
+            googlePlacesUrl.append("&keyword=").append(cuisine);
+        }
+        if(checkboxValue==1&&!radius.equals("None")){
+            googlePlacesUrl.append("&radius=").append(radius);
+        } else{
+            googlePlacesUrl.append("&radius=").append(350); //set radius around location
+        }
         googlePlacesUrl.append("&key=" + "AIzaSyCO4NSMZ1u7SGC4pmBO9bqSdaNRrzJuCoE"); //set the api key
 
         JsonObjectRequest request = new JsonObjectRequest( googlePlacesUrl.toString(),null,

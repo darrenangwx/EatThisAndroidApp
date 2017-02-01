@@ -20,8 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="5"
-        android:id="@+id/ratingspinner"
-        android:entries="@array/RatingPick"
+        android:id="@+id/radiusspinner"
+        android:entries="@array/RadiusPick"
         android:layout_alignBaseline="@+id/Rating"
         android:layout_alignBottom="@+id/Rating"
         android:layout_alignEnd="@+id/restaurantspinner"
@@ -34,11 +34,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="23dp"
         android:id="@+id/Done"
-        android:layout_below="@+id/ratingspinner"
+        android:layout_below="@+id/radiusspinner"
         android:layout_centerHorizontal="true" />
 
     <TextView
-        android:text="@string/Rating"
+        android:text="@string/Radius"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"

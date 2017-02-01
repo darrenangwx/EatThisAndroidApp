@@ -36,16 +36,13 @@ import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 
 public class FavouritesFrag extends Fragment {
     // /Relating to database Stuff
-    String RestaurantName;
-    String RestaurantLocation;
 
     private static String[] FROM =
-            {_ID, DatabaseConstants.RestaurantName, DatabaseConstants.RestaurantLocation};
-    private static String ORDER_BY = DatabaseConstants._ID + " ASC";
+            {_ID, DatabaseConstants.RestaurantName, DatabaseConstants.RestaurantLocation, DatabaseConstants.PlaceID, DatabaseConstants.RestaurantLat, DatabaseConstants.RestaurantLong};
+    private static String ORDER_BY = DatabaseConstants.RestaurantName + " ASC";
     private DatabaseEventsData locationdetails;
 
     TextView text;
-    ListView list;
 
     @Nullable
     @Override
@@ -73,12 +70,10 @@ public class FavouritesFrag extends Fragment {
     private void showEvents(Cursor cursor){
         StringBuilder builder = new StringBuilder();
         while (cursor.moveToNext()){
-            long id = cursor.getLong(0);
             String RestaurantName = cursor.getString(1);
             String RestaurantLocation = cursor.getString(2);
-            builder.append(id).append(": ");
             builder.append(RestaurantName).append("\n");
-            builder.append(RestaurantLocation).append("\n");
+            builder.append(RestaurantLocation).append("\n\n");
         }
 
         text.setText(builder);
