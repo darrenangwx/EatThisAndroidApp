@@ -7,9 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -48,6 +50,9 @@ public class FavouritesFrag extends Fragment {
     ListView list;
     static String[] arrayresname;
     static String[] arrayresloc;
+    static String[] arrayresid;
+    static double[] arrayreslong;
+    static double[] arrayreslat;
 
     @Nullable
     @Override
@@ -66,6 +71,18 @@ public class FavouritesFrag extends Fragment {
         }
         list = (ListView) v.findViewById(R.id.listView);
         list.setAdapter(new VivzAdapter(FavouritesFrag.this.getActivity()));
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SingleRow data = (SingleRow) list.getItemAtPosition(position);
+
+                System.out.println(data.title);
+                System.out.println(data.description);
+                System.out.println(data.id);
+                System.out.println(data.coords[0]); // Latitude
+                System.out.println(data.coords[1]); // Longtitude
+            }
+        });
         return v;
     }
     public Cursor getEvents(){
@@ -88,12 +105,21 @@ public class FavouritesFrag extends Fragment {
         private void showEvents(Cursor cursor){
             arrayresname = new String[cursor.getCount()];
             arrayresloc = new String[cursor.getCount()];
+            arrayresid = new String[cursor.getCount()];
+            arrayreslat = new double[cursor.getCount()];
+            arrayreslong = new double[cursor.getCount()];
             int o = 0;
             while(cursor.moveToNext()){
-                String allfavresname = cursor.getString(cursor.getColumnIndex("RestaurantName"));
-                String allfavresloc = cursor.getString(cursor.getColumnIndex("RestaurantLocation"));
+                String allfavresname = cursor.getString(cursor.getColumnIndex(DatabaseConstants.RestaurantName));
+                String allfavresloc = cursor.getString(cursor.getColumnIndex(DatabaseConstants.RestaurantLocation));
+                String allfavresid = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PlaceID));
+                double allfavreslong = cursor.getDouble(cursor.getColumnIndex(DatabaseConstants.RestaurantLong));
+                double allfavreslat = cursor.getDouble(cursor.getColumnIndex(DatabaseConstants.RestaurantLat));
                 arrayresname[o] = allfavresname;
                 arrayresloc[o] = allfavresloc;
+                arrayresid[o] = allfavresid;
+                arrayreslong[o] = allfavreslong;
+                arrayreslat[o] = allfavreslat;
                 o++;
             }
 
@@ -112,6 +138,15 @@ public class FavouritesFrag extends Fragment {
     {
         return(arrayresloc);
     }
+    public static String[] returnArrayId() {return (arrayresid);}
+    public static double[] returnArraylatitude()
+    {
+        return(arrayreslat);
+    }
+    public static double[] returnArraylongtitude()
+    {
+        return(arrayreslong);
+    }
 
 
 
@@ -121,16 +156,26 @@ public class FavouritesFrag extends Fragment {
         //you can set the title for your toolbar here for different fragments different titles
         getActivity().setTitle("Favourites");
     }
+
+    public void replaceFragment(Fragment fragment){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.content_frame, fragment);
+        ft.commit();
+    }
 }
 
 class SingleRow
 {
     String title;
     String description;
-    SingleRow(String title, String description)
+    String id;
+    double[] coords;
+    SingleRow(String title, String description, String id, double[] coords)
     {
         this.title=title;
         this.description=description;
+        this.id = id;
+        this.coords = coords;
     }
 }
 class VivzAdapter extends BaseAdapter {
@@ -143,9 +188,12 @@ class VivzAdapter extends BaseAdapter {
         Resources res = c.getResources();
         String[] ArraysofResNames = FavouritesFrag.returnArrayname();
         String[] ArraysofResLocation = FavouritesFrag.returnArraylocation();
+        String[] ArraysofResId = FavouritesFrag.returnArrayId();
+        double[] ArraysofResLatitude = FavouritesFrag.returnArraylatitude();
+        double[] ArraysofResLongtitude = FavouritesFrag.returnArraylongtitude();
 
         for (int i = 0; i < ArraysofResNames.length; i++) {
-            list.add(new SingleRow(ArraysofResNames[i], ArraysofResLocation[i]));
+            list.add(new SingleRow(ArraysofResNames[i], ArraysofResLocation[i], ArraysofResId[i], new double[]{ArraysofResLatitude[i], ArraysofResLongtitude[i]}));
         }
 
     }
