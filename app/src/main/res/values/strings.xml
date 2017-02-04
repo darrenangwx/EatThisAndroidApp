@@ -54,5 +54,8 @@
         <item>Chinatown Street 9 #-02-144 740819</item>
     </string-array>-->
 
-    <string name="about_text">Having troubles deciding what to eat? Let this app help you! Switch on your GPS or key in your location and we will choose a suitable place for you to eat nearby. Never will you have to wreck your brains about meals ever again!</string>
+    <string name="about_title">Eat This!</string>
+    <string name="about_version">Version: 1.0</string>
+    <string name="about_developers">Developers</string>
+    <string name="about_hdescription">Description</string>
 </resources>
