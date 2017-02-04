@@ -56,6 +56,12 @@
 
     <string name="about_title">Eat This!</string>
     <string name="about_version">Version: 1.0</string>
+    <string name="about_description">Eat This! is a school project mobile application that picks a restaurant for you based on your location.</string>
+    <string name="about_teamname">Team: MDS </string>
     <string name="about_developers">Developers</string>
+    <string name="about_names">- Ang Wei Xiang Darren</string>
+    <string name="about_names2">- Chua Ming Kiang</string>
+    <string name="about_names3">- Stanley Cheong Guo Hao</string>
     <string name="about_hdescription">Description</string>
+    <string name="about_descriptions">Having troubles deciding what to eat? Let this app help you! Switch on your GPS or key in your location and we will choose a suitable place for you to eat nearby. Never will you have to wreck your brains about meals ever again!</string>
 </resources>
