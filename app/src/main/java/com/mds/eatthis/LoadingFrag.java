@@ -3,12 +3,14 @@ package com.mds.eatthis;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -44,14 +46,19 @@ import java.io.IOException;
 import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Locale;
+import java.util.jar.*;
+import java.util.jar.Manifest;
 
 import static android.content.ContentValues.TAG;
+import static android.content.Context.LOCATION_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
+import static android.support.v4.content.PermissionChecker.checkSelfPermission;
 import static com.mds.eatthis.AppConfig.*;
 import static com.mds.eatthis.R.string.advSearch;
 
 
 public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    public static final int LOCATION_REQUEST_CODE = 10;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private ProgressBar spinner;
@@ -70,7 +77,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
         //returning our layout file
         View v = inflater.inflate(R.layout.fragment_loading, container, false);
         //loading spinner
-        spinner = (ProgressBar)v.findViewById(R.id.progressBar1);
+        spinner = (ProgressBar) v.findViewById(R.id.progressBar1);
         spinner.setVisibility(View.VISIBLE);
         System.out.println("LoadingFrag");
         //get switch value
@@ -88,7 +95,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                 .addApi(Places.PLACE_DETECTION_API)
                 .build();
 
-        if(switchValue == 0){
+        if (switchValue == 0) {
             locationID = sharedPreferences.getString("inputLocID", "");
         }
 
@@ -104,22 +111,22 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     }
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if(switchValue == 0){
+        if (switchValue == 0) {
             findLocationFromID(locationID);
-        }else{
+        } else {
             startLocationUpdates();
         }
     }
 
     //get user inputted location coordinates from ID
-    private void findLocationFromID(String locationID){
+    private void findLocationFromID(String locationID) {
         Places.GeoDataApi.getPlaceById(mGoogleApiClient, locationID)
                 .setResultCallback(new ResultCallback<PlaceBuffer>() {
                     @Override
@@ -143,11 +150,11 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     }
 
     private void loadNearByPlaces(double latitude, double longitude) {
-        SharedPreferences sharedPref = getActivity().getSharedPreferences("SpinnerData",MODE_PRIVATE);
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("SpinnerData", MODE_PRIVATE);
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("searchFragData", MODE_PRIVATE);
         checkboxValue = Integer.parseInt(sharedPreferences.getString("checkboxValue", ""));
-        String cuisine = sharedPref.getString("cuisine","");
-        String radius = sharedPref.getString("radius","");
+        String cuisine = sharedPref.getString("cuisine", "");
+        String radius = sharedPref.getString("radius", "");
 
         String type = "restaurant";
         StringBuilder googlePlacesUrl =
@@ -155,25 +162,25 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
         googlePlacesUrl.append("location=").append(latitude).append(",").append(longitude);
         googlePlacesUrl.append("&types=").append(type); //set the type of places to get which is restarant
         googlePlacesUrl.append("&sensor=false"); //sensor false = not using GPS
-        if(checkboxValue==1&&!cuisine.equals("None")){
+        if (checkboxValue == 1 && !cuisine.equals("None")) {
             googlePlacesUrl.append("&keyword=").append(cuisine);
         }
-        if(checkboxValue==1&&!radius.equals("None")){
+        if (checkboxValue == 1 && !radius.equals("None")) {
             googlePlacesUrl.append("&radius=").append(radius);
-        } else{
+        } else {
             googlePlacesUrl.append("&radius=").append(350); //set radius around location
         }
         googlePlacesUrl.append("&key=" + "AIzaSyCO4NSMZ1u7SGC4pmBO9bqSdaNRrzJuCoE"); //set the api key
 
-        JsonObjectRequest request = new JsonObjectRequest( googlePlacesUrl.toString(),null,
+        JsonObjectRequest request = new JsonObjectRequest(googlePlacesUrl.toString(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject result) {
 
                         Log.i(TAG, "onResponse: Result= " + result.toString());
-                        try{
+                        try {
                             //check if there are any nearby restaurants being returned
-                            if(result.getString("status").equalsIgnoreCase("OK")){
+                            if (result.getString("status").equalsIgnoreCase("OK")) {
 
                                 //Send the JSONObject with the nearby places to MapViewFrag
                                 Bundle args = new Bundle();
@@ -183,28 +190,29 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                                 fragment.setArguments(args);
                                 replaceFragment(fragment);
 
-                            }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
+                            } else if (result.getString("status").equalsIgnoreCase("ZERO_RESULTS")) {
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoadingFrag.this.getActivity());
                                 alertDialogBuilder.setMessage("No nearby restaurants found")
                                         .setCancelable(false)
                                         .setPositiveButton("Ok",
-                                                new DialogInterface.OnClickListener(){
-                                                    public void onClick(DialogInterface dialog, int id){
+                                                new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
                                                         //send user back to Search fragment
-                                                        Fragment fragment =  new SearchFrag();
+                                                        Fragment fragment = new SearchFrag();
                                                         replaceFragment(fragment);
                                                     }
                                                 });
                                 AlertDialog alert = alertDialogBuilder.create();
                                 alert.show();
                             }
-                        }catch(JSONException e){
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
                 },
                 new Response.ErrorListener() {
-                    @Override                    public void onErrorResponse(VolleyError error) {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "onErrorResponse: Error= " + error);
                         Log.e(TAG, "onErrorResponse: Error= " + error.getMessage());
                     }
@@ -215,21 +223,39 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     }
 
     //replace fragment when button is clicked
-    public void replaceFragment(Fragment fragment){
+    public void replaceFragment(Fragment fragment) {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, fragment);
         ft.commit();
     }
 
     //request for location updates
-    private void startLocationUpdates(){
+    private void startLocationUpdates() {
         System.out.println("Start location updates");
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10 * 1000)
                 .setFastestInterval(2000);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        //Check if permission is granted for location
+        if(ActivityCompat.checkSelfPermission(getActivity(),android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        } else{
+            String[] permissionRequested = {android.Manifest.permission.ACCESS_FINE_LOCATION};
+            requestPermissions(permissionRequested,   LOCATION_REQUEST_CODE);
+        }
+    }
 
+    //Method for location permission checking
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==LOCATION_REQUEST_CODE){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.nolocation),Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override

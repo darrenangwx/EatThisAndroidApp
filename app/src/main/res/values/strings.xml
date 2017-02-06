@@ -64,4 +64,5 @@
     <string name="about_names3">- Stanley Cheong Guo Hao</string>
     <string name="about_hdescription">Description</string>
     <string name="about_descriptions">Having troubles deciding what to eat? Let this app help you! Switch on your GPS or key in your location and we will choose a suitable place for you to eat nearby. Never will you have to wreck your brains about meals ever again!</string>
+    <string name="nolocation">Unable to use GPS without Permissions</string>
 </resources>

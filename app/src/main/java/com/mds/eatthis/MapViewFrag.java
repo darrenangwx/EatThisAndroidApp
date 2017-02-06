@@ -23,8 +23,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,8 +44,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import static android.R.attr.fragment;
+import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 import static com.mds.eatthis.DatabaseConstants.PlaceID;
@@ -238,7 +245,10 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             placeid = place.getString("place_id");
             placeLatitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
             placeLongitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
-            restaurant.setText(placeName);
+            //Underline restaurant name
+            SpannableString content = new SpannableString(placeName);
+            content.setSpan(new UnderlineSpan(),0,placeName.length(),0);
+            restaurant.setText(content);
             address.setText(vicinity);
             RestaurantName1 = placeName;
             RestaurantLocation1 = vicinity;
@@ -460,6 +470,31 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, fragment);
         ft.commit();
+    }
+
+    @Override
+    public void onResume() {
+
+        super.onResume();
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+
+                    Fragment fragment = new SearchFrag();
+                    replaceFragment(fragment);
+
+                    return true;
+
+                }
+
+                return false;
+            }
+        });
     }
 
 }

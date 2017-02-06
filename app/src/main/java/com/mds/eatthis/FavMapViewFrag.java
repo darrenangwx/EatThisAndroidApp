@@ -10,7 +10,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -153,7 +156,9 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
         Marker userLocMarker = gMap.addMarker(option);
         //set text view to appropriate text
         address.setText(vicinity);
-        restaurant.setText(placeName);
+        SpannableString content = new SpannableString(placeName);
+        content.setSpan(new UnderlineSpan(),0,placeName.length(),0);
+        restaurant.setText(content);
         userLocMarker.showInfoWindow();
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(placeLatitude, placeLongitude), 17.0f));
     }
@@ -232,5 +237,36 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
 
         System.out.println(request + "REQUEST RIGHT HERE");
         AppController.getInstance().addToRequestQueue(request);
+    }
+
+    public void replaceFragment(Fragment fragment){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.content_frame, fragment);
+        ft.commit();
+    }
+
+    @Override
+    public void onResume() {
+
+        super.onResume();
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+
+                    Fragment fragment = new FavouritesFrag();
+                    replaceFragment(fragment);
+
+                    return true;
+
+                }
+
+                return false;
+            }
+        });
     }
 }
