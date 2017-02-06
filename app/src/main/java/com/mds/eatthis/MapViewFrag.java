@@ -439,10 +439,12 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                                 } else {
                                     Log.i(TAG, "No website found.");
 
-                                    Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                                    /*Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                                     String term = placeName + " "+vicinity;   // term which you want to search for
                                     intent.putExtra(SearchManager.QUERY, term);
-                                    startActivity(intent);
+                                    startActivity(intent);*/
+
+                                    Toast.makeText(getActivity(), "No Website found", Toast.LENGTH_SHORT).show();
 
                                 }
 
