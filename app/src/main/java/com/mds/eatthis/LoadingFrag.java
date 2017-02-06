@@ -133,7 +133,6 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                             savePreferences("cLng", currentLongtitude);
                             //After lat and lng stored in preferences, get nearby places
                             loadNearByPlaces(gotLocation.latitude, gotLocation.longitude);
-                            //After lat and lng stored in preferences, replace fragment
                             Log.i(TAG, "Place found: " + myPlace.getName());
                         } else {
                             Log.e(TAG, "Place not found");
@@ -175,9 +174,6 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                         try{
                             //check if there are any nearby restaurants being returned
                             if(result.getString("status").equalsIgnoreCase("OK")){
-                                System.out.println("INSIDE ONRESPONSE");
-
-                                System.out.println(result.getJSONArray("results"));
 
                                 //Send the JSONObject with the nearby places to MapViewFrag
                                 Bundle args = new Bundle();

@@ -3,10 +3,7 @@ package com.mds.eatthis;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 
-import com.google.android.gms.location.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -19,12 +16,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -34,7 +28,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -76,9 +69,9 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     private Button changeRestaurant;
     private TextView restaurant;
     private TextView address;
-    String placeName, vicinity, placeid, id;
+    String placeName, vicinity, placeid;
 
-    int testid = 1;
+    int favheartid = 1;
     JSONObject nearbyPlaceResult;
 
     int newPlace = 9000; //A random number as long as is not 20 or below as JSONArray returns 20 or less results
@@ -141,13 +134,13 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             @Override
             public void onClick(View view) {
 
-                if(testid == 1){
+                if(favheartid == 1){
                         try{
                             addEvent();
 
                             Toast.makeText(MapViewFrag.this.getActivity(),"Added to favourites", Toast.LENGTH_SHORT).show();
                             heartButton.setBackgroundResource(R.drawable.favourited);
-                            testid = 0;
+                            favheartid = 0;
 
                         }finally{
                             locationdetails.close();
@@ -160,7 +153,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
                     Toast.makeText(MapViewFrag.this.getActivity(),"Removed from favourites", Toast.LENGTH_SHORT).show();
                     heartButton.setBackgroundResource(R.drawable.favouriteborder);
-                    testid = 1;
+                    favheartid = 1;
                 }
 
             }
@@ -170,7 +163,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         changeRestaurant.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                testid = 1;
+                favheartid = 1;
                 heartButton.setBackgroundResource(R.drawable.favouriteborder);
                 gMap.clear();
                 mMapView.getMapAsync(MapViewFrag.this);
@@ -243,9 +236,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             placeName = place.getString("name");
             vicinity = place.getString("vicinity");
             placeid = place.getString("place_id");
-            System.out.println("Place id " + placeid);
-            id = place.getString("id");
-            System.out.println("ID " + id);
             placeLatitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
             placeLongitude = place.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
             restaurant.setText(placeName);
@@ -277,7 +267,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
             if(cursor.moveToNext()) {
                 heartButton.setBackgroundResource(R.drawable.favourited);
-                testid = 0;
+                favheartid = 0;
             }
 
 

@@ -45,7 +45,7 @@
         <item>Danny’s Wings</item>
         <item>Duck Rice Restaurant</item>
     </string-array>
-    <string-array name="description">
+    <string-array name="address">
         <item>Block 79 Marsling Street 9 #01-112 679592</item>
         <item>Block 8 Bukit Batok Drive #01-42B 680972</item>
         <item>Lor 21 Geylang Road  #1-21 790216</item>

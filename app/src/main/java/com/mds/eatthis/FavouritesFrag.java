@@ -14,24 +14,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 //db Stuff
-import static android.R.id.list;
 import static android.provider.BaseColumns._ID;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
-import static com.mds.eatthis.DatabaseConstants.RestaurantName;
-import static com.mds.eatthis.DatabaseConstants.RestaurantLocation;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 
 /**
  * Created by Darren on 1/22/2017.
@@ -76,8 +66,27 @@ public class FavouritesFrag extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SingleRow data = (SingleRow) list.getItemAtPosition(position);
 
+                Bundle args = new Bundle();
+                Fragment fragment = new FavMapViewFrag();
+                String title = data.title;
+                String address = data.address;
+                String placeid = data.id;
+                Double lat = data.coords[0];
+                Double lng = data.coords[1];
+                args.putString("placeid", placeid);
+                args.putString("placeName", title);
+                args.putString("address", address);
+                args.putDouble("lat", lat);
+                args.putDouble("lng", lng);
+                fragment.setArguments(args);
+
+                //replace with FavMapViewFrag
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.content_frame, fragment);
+                ft.commit();
+
                 System.out.println(data.title);
-                System.out.println(data.description);
+                System.out.println(data.address);
                 System.out.println(data.id);
                 System.out.println(data.coords[0]); // Latitude
                 System.out.println(data.coords[1]); // Longtitude
@@ -91,24 +100,13 @@ public class FavouritesFrag extends Fragment {
         return cursor;
     }
 
-/*    private void showEvents(Cursor cursor){
-        StringBuilder builder = new StringBuilder();
-        while (cursor.moveToNext()){
-            String RestaurantName = cursor.getString(1);
-            String RestaurantLocation = cursor.getString(2);
-            builder.append(RestaurantName).append("\n");
-            builder.append(RestaurantLocation).append("\n\n");
-        }
-
-        text.setText(builder);
-    }*/
-        private void showEvents(Cursor cursor){
-            arrayresname = new String[cursor.getCount()];
-            arrayresloc = new String[cursor.getCount()];
-            arrayresid = new String[cursor.getCount()];
-            arrayreslat = new double[cursor.getCount()];
-            arrayreslong = new double[cursor.getCount()];
-            int o = 0;
+    private void showEvents(Cursor cursor){
+        arrayresname = new String[cursor.getCount()];
+        arrayresloc = new String[cursor.getCount()];
+        arrayresid = new String[cursor.getCount()];
+        arrayreslat = new double[cursor.getCount()];
+        arrayreslong = new double[cursor.getCount()];
+        int o = 0;
             while(cursor.moveToNext()){
                 String allfavresname = cursor.getString(cursor.getColumnIndex(DatabaseConstants.RestaurantName));
                 String allfavresloc = cursor.getString(cursor.getColumnIndex(DatabaseConstants.RestaurantLocation));
@@ -123,13 +121,7 @@ public class FavouritesFrag extends Fragment {
                 o++;
             }
 
-/*        StringBuilder builder = new StringBuilder();
-        while (cursor.moveToNext()){
-            String RestaurantName = cursor.getString(1);
-            String RestaurantLocation = cursor.getString(2);
-            builder.append(RestaurantName).append("\n");
-            builder.append(RestaurantLocation).append("\n\n");*/
-        }
+    }
     public static String[] returnArrayname()
     {
         return(arrayresname);
@@ -167,13 +159,13 @@ public class FavouritesFrag extends Fragment {
 class SingleRow
 {
     String title;
-    String description;
+    String address;
     String id;
     double[] coords;
-    SingleRow(String title, String description, String id, double[] coords)
+    SingleRow(String title, String address, String id, double[] coords)
     {
         this.title=title;
-        this.description=description;
+        this.address = address;
         this.id = id;
         this.coords = coords;
     }
@@ -223,7 +215,7 @@ class VivzAdapter extends BaseAdapter {
         SingleRow temp = list.get(i);
 
         title.setText(temp.title);
-        description.setText(temp.description);
+        description.setText(temp.address);
 
         return row;
     }
