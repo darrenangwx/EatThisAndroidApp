@@ -15,5 +15,4 @@ public interface DatabaseConstants extends BaseColumns {
     public static final String PlaceID = "PlaceID";
     public static final String RestaurantLat = "RestaurantLat";
     public static final String RestaurantLong = "RestaurantLong";
-    //maybe can store the coordinate of the place so can just put this into mapviewfrag when called from fav
 }
