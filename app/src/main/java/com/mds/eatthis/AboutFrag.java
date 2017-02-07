@@ -34,6 +34,7 @@ public class AboutFrag extends Fragment {
 
         super.onResume();
 
+        //Returns to SearchFrag when back button is pressed
         getView().setFocusableInTouchMode(true);
         getView().requestFocus();
         getView().setOnKeyListener(new View.OnKeyListener() {

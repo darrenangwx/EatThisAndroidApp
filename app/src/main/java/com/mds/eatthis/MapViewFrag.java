@@ -309,6 +309,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
                             }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
                                 Log.i(TAG, "No results found for polyline");
+                                Toast.makeText(getActivity(), "Directions could not be shown", Toast.LENGTH_SHORT).show();
                             }
                         }catch(JSONException e){
                             e.printStackTrace();

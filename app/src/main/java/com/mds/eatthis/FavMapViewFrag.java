@@ -163,7 +163,6 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
 
 
     private void addEvent() {
-        //wanted to check if record already favourited
         SQLiteDatabase db = locationdetails.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -209,10 +208,7 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
                                 } else {
                                     Log.i(TAG, "No website found.");
 
-                                    Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                                    String term = placeName + " "+vicinity;   // term which you want to search for
-                                    intent.putExtra(SearchManager.QUERY, term);
-                                    startActivity(intent);
+                                    Toast.makeText(getActivity(), "No Website found", Toast.LENGTH_SHORT).show();
                                 }
                             }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
                                 Log.i(TAG, "No results found");
@@ -223,7 +219,8 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
                     }
                 },
                 new Response.ErrorListener() {
-                    @Override                    public void onErrorResponse(VolleyError error) {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "onErrorResponse: Error= " + error);
                         Log.e(TAG, "onErrorResponse: Error= " + error.getMessage());
                     }
