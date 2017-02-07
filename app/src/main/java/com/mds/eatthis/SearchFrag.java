@@ -128,9 +128,6 @@ public class SearchFrag extends Fragment {
                 }else{
                     Fragment fragment = new LoadingFrag();
                     replaceFragment(fragment);
-
-                    //TODO maybe not needed anymore cos google autocomplete helped us to it
-                    hideKeyboard(getContext());
                 }
 
 
@@ -257,17 +254,5 @@ public class SearchFrag extends Fragment {
         prefEditor.putString(key, value);
         prefEditor.commit();
         System.out.println(sharedPreferences.getString("inputLocID", ""));
-    }
-
-    public static void hideKeyboard(Context ctx) {
-        InputMethodManager inputManager = (InputMethodManager) ctx
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        // check if no view has focus:
-        View v = ((Activity) ctx).getCurrentFocus();
-        if (v == null)
-            return;
-
-        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 }
