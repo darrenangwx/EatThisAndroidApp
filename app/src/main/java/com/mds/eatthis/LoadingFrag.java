@@ -4,10 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -21,7 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.android.volley.Request;
+
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -31,31 +28,20 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataApi;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.sql.SQLOutput;
-import java.util.List;
-import java.util.Locale;
-import java.util.jar.*;
-import java.util.jar.Manifest;
-
 import static android.content.ContentValues.TAG;
-import static android.content.Context.LOCATION_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
-import static android.support.v4.content.PermissionChecker.checkSelfPermission;
-import static com.mds.eatthis.AppConfig.*;
-import static com.mds.eatthis.R.string.advSearch;
 
+/**
+ * Created by Darren, Ming Kiang and Stanley.
+ */
 
 public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     public static final int LOCATION_REQUEST_CODE = 10;
@@ -66,15 +52,11 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     int checkboxValue;
     String locationID;
     String currentLatitude, currentLongtitude;
-    private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
-    private static final boolean PRINT_AS_STRING = false;
 
-    //TODO: what is nullable
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //TODO remove all comments under here for all frag with all debugging sysoutprintln
-        //returning our layout file
+        //Storing of layout file in variable v
         View v = inflater.inflate(R.layout.fragment_loading, container, false);
         //loading spinner
         spinner = (ProgressBar) v.findViewById(R.id.progressBar1);
@@ -95,6 +77,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                 .addApi(Places.PLACE_DETECTION_API)
                 .build();
 
+        //If not using location, get inputLocID from sharedPreferences instead
         if (switchValue == 0) {
             locationID = sharedPreferences.getString("inputLocID", "");
         }
@@ -105,8 +88,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //TODO same here remove all comments under here for all frag
-        //you can set the title for your toolbar here for different fragments different titles
+        //setting of toolbar title
         getActivity().setTitle("Search");
     }
 
@@ -125,7 +107,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
         }
     }
 
-    //get user inputted location coordinates from ID
+    //get user inputted location coordinates from ID using Android Places API
     private void findLocationFromID(String locationID) {
         Places.GeoDataApi.getPlaceById(mGoogleApiClient, locationID)
                 .setResultCallback(new ResultCallback<PlaceBuffer>() {
@@ -149,14 +131,15 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                 });
     }
 
+    //Start getting nearbyplaces from a specific location
     private void loadNearByPlaces(double latitude, double longitude) {
         SharedPreferences sharedPref = getActivity().getSharedPreferences("SpinnerData", MODE_PRIVATE);
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("searchFragData", MODE_PRIVATE);
         checkboxValue = Integer.parseInt(sharedPreferences.getString("checkboxValue", ""));
         String cuisine = sharedPref.getString("cuisine", "");
         String radius = sharedPref.getString("radius", "");
-
         String type = "restaurant";
+
         StringBuilder googlePlacesUrl =
                 new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         googlePlacesUrl.append("location=").append(latitude).append(",").append(longitude);
@@ -168,7 +151,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
         if (checkboxValue == 1 && !radius.equals("None")) {
             googlePlacesUrl.append("&radius=").append(radius);
         } else {
-            googlePlacesUrl.append("&radius=").append(350); //set radius around location
+            googlePlacesUrl.append("&radius=").append(350); //set default radius around location
         }
         googlePlacesUrl.append("&key=" + "AIzaSyCO4NSMZ1u7SGC4pmBO9bqSdaNRrzJuCoE"); //set the api key
 
@@ -191,6 +174,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                                 replaceFragment(fragment);
 
                             } else if (result.getString("status").equalsIgnoreCase("ZERO_RESULTS")) {
+                                //If there are no restaurant found at the user's location, pop up a dialog box
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoadingFrag.this.getActivity());
                                 alertDialogBuilder.setMessage("No nearby restaurants found")
                                         .setCancelable(false)
@@ -218,7 +202,7 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
                     }
                 });
 
-        System.out.println(request + "REQUEST RIGHT HERE");
+        //Adding request to queue
         AppController.getInstance().addToRequestQueue(request);
     }
 
@@ -272,9 +256,9 @@ public class LoadingFrag extends Fragment implements GoogleApiClient.ConnectionC
 
     }
 
+    //When requestLocationUpdates is called
     @Override
     public void onLocationChanged(Location location) {
-        System.out.println(location + "In loadingfrag onlocchange");
         currentLatitude = Double.toString(location.getLatitude());
         currentLongtitude = Double.toString(location.getLongitude());
         System.out.println(currentLongtitude+"currlong");

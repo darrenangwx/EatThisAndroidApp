@@ -16,14 +16,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import android.app.SearchManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -44,11 +42,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
-import static android.R.attr.fragment;
-import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 import static com.mds.eatthis.DatabaseConstants.PlaceID;
@@ -57,7 +52,6 @@ import static com.mds.eatthis.DatabaseConstants.RestaurantLong;
 import static com.mds.eatthis.R.id.map;
 
 //db Stuff
-import static android.provider.BaseColumns._ID;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 import static com.mds.eatthis.DatabaseConstants.RestaurantName;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLocation;
@@ -86,26 +80,15 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     LatLng latLngUserLoc;
     LatLng latLngNearbyPlace;
     double placeLatitude, placeLongitude;
-
     double currentLatitude, currentLongtitude;
 
-    //Relating to database Stuff
-    String RestaurantName1;
-    String RestaurantLocation1;
-
-    private static String[] FROM =
-            {_ID, DatabaseConstants.RestaurantName, DatabaseConstants.RestaurantLocation, DatabaseConstants.PlaceID, DatabaseConstants.RestaurantLat, DatabaseConstants.RestaurantLong};
-    private static String ORDER_BY = DatabaseConstants.RestaurantName + " DESC";
     private DatabaseEventsData locationdetails;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //returning our layout file
-        //change R.layout.yourlayoutfilename for each of your fragments
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        //Storing of layout file in variable v
         View v = inflater.inflate(R.layout.fragment_map, container, false);
-
 
         //Initializing map
         try {
@@ -131,8 +114,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
         restaurant = (TextView) v.findViewById(R.id.restaurant);
         address = (TextView) v.findViewById(R.id.address);
-
-
         heartButton = (ImageButton) v.findViewById(R.id.heartborder);
 
         locationdetails = new DatabaseEventsData(MapViewFrag.this.getActivity());
@@ -140,20 +121,17 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         heartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if(favheartid == 1){
                         try{
+                            //add restaurant name and location to database
                             addEvent();
 
                             Toast.makeText(MapViewFrag.this.getActivity(),"Added to favourites", Toast.LENGTH_SHORT).show();
                             heartButton.setBackgroundResource(R.drawable.favourited);
                             favheartid = 0;
-
                         }finally{
                             locationdetails.close();
                         }
-
-
                 }else{
                     //delete restaurant name and location from database
                     removeEvent(placeid);
@@ -162,7 +140,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                     heartButton.setBackgroundResource(R.drawable.favouriteborder);
                     favheartid = 1;
                 }
-
             }
         });
 
@@ -173,6 +150,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                 favheartid = 1;
                 heartButton.setBackgroundResource(R.drawable.favouriteborder);
                 gMap.clear();
+                //call onMapReady
                 mMapView.getMapAsync(MapViewFrag.this);
             }
         });
@@ -183,17 +161,35 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                 findWebSite(placeid);
             }
         });
-
-
         locationdetails.close();
+
         return v;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //you can set the title for your toolbar here for different fragments different titles
+        //seting of toolbar title
         getActivity().setTitle("Map");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+                    Fragment fragment = new SearchFrag();
+                    replaceFragment(fragment);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -203,7 +199,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         currentLatitude = Double.parseDouble(sharedPreferences.getString("cLat", ""));
         currentLongtitude = Double.parseDouble(sharedPreferences.getString("cLng", ""));
         System.out.println(currentLatitude + currentLongtitude + "latlonginmapready");
-        // Add a marker in user's coordinates and move the camera
+        // Add a marker in user's coordinates
         latLngUserLoc = new LatLng(currentLatitude, currentLongtitude);
         MarkerOptions option = new MarkerOptions().position(latLngUserLoc).title("You are here");
         Marker userLocMarker = gMap.addMarker(option);
@@ -215,7 +211,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                //open google maps
+                //open google maps application
                 showDirections(currentLatitude,currentLongtitude,placeLatitude,placeLongitude);
             }
         });
@@ -226,7 +222,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         try {
             JSONArray jsonArray = nearbyPlaceResult.getJSONArray("results");
             Random rand = new Random();
-            if(newPlace == 9000){
+            if(newPlace == 9000){//only for displaying of first restaurant
                 newPlace = rand.nextInt(jsonArray.length() - 0) + 0;
                 oldPlace = newPlace;
             }else{
@@ -238,7 +234,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                 }
                 oldPlace = newPlace;
             }
-            System.out.println(newPlace);
             JSONObject place = jsonArray.getJSONObject(newPlace);
             placeName = place.getString("name");
             vicinity = place.getString("vicinity");
@@ -250,11 +245,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
             content.setSpan(new UnderlineSpan(),0,placeName.length(),0);
             restaurant.setText(content);
             address.setText(vicinity);
-            RestaurantName1 = placeName;
-            RestaurantLocation1 = vicinity;
-            //Cursor cursor = getEvents();
-            // Function getEvents is returning a null value;
-
 
             MarkerOptions markerOptions = new MarkerOptions();
             latLngNearbyPlace = new LatLng(placeLatitude, placeLongitude);
@@ -280,7 +270,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                 favheartid = 0;
             }
 
-
         }catch(JSONException e){
             e.printStackTrace();
         }
@@ -294,7 +283,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                 lng1));
         intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
         startActivity(intent);
-
     }
 
     private void getDirections(LatLng origin,LatLng dest){
@@ -304,7 +292,8 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         googleDirectionsUrl.append("&destination=").append(dest.latitude+",").append(dest.longitude);
         googleDirectionsUrl.append("&sensor=false");
         googleDirectionsUrl.append("&mode=walking");
-        //For testing
+
+        //Printing out the url to console, for testing purposes
         System.out.println(googleDirectionsUrl.toString());
 
         JsonObjectRequest request = new JsonObjectRequest(googleDirectionsUrl.toString() ,null,
@@ -314,15 +303,12 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
                         Log.i(TAG, "onResponse: Result= " + result.toString());
                         try{
-                            //TODO remove if else
                             if(result.getString("status").equalsIgnoreCase("OK")){
-                                System.out.println("INSIDE getDirectionsURL");
-
                                 //start parsing directions
                                 parsePolyLine(result);
 
                             }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
-                                //TODO do something
+                                Log.i(TAG, "No results found for polyline");
                             }
                         }catch(JSONException e){
                             e.printStackTrace();
@@ -335,11 +321,12 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                         Log.e(TAG, "onErrorResponse: Error= " + error.getMessage());
                     }
                 });
+
+        //Adding request to queue
         AppController.getInstance().addToRequestQueue(request);
     }
 
     private void parsePolyLine(JSONObject polyLineResult){
-        System.out.println("in parsepolyline " + polyLineResult);
 
         List<List<HashMap<String, String>>> routes = null;
         ArrayList<LatLng> points = null;
@@ -378,7 +365,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         
         //After everything is set, set the boundary using the markers and polyline as reference so that everything can be shown on the map
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
         for(LatLng point : points){
             builder.include(point);
         }
@@ -391,8 +377,6 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
     }
 
     private void addEvent() {
-        //wanted to check if record alr fav
-
         SQLiteDatabase db = locationdetails.getWritableDatabase();
 
             ContentValues values = new ContentValues();
@@ -438,18 +422,11 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
 
                                 } else {
                                     Log.i(TAG, "No website found.");
-
-                                    /*Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                                    String term = placeName + " "+vicinity;   // term which you want to search for
-                                    intent.putExtra(SearchManager.QUERY, term);
-                                    startActivity(intent);*/
-
                                     Toast.makeText(getActivity(), "No Website found", Toast.LENGTH_SHORT).show();
-
                                 }
 
                             }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
-                                //TODO do something
+                                Log.i(TAG, "nothing");
                             }
                         } catch (JSONException e1) {
                             e1.printStackTrace();
@@ -464,7 +441,7 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
                     }
                 });
 
-        System.out.println(request + "REQUEST RIGHT HERE");
+        //Adding request to queue
         AppController.getInstance().addToRequestQueue(request);
     }
 
@@ -473,30 +450,4 @@ public class MapViewFrag extends Fragment implements OnMapReadyCallback{
         ft.replace(R.id.content_frame, fragment);
         ft.commit();
     }
-
-    @Override
-    public void onResume() {
-
-        super.onResume();
-
-        getView().setFocusableInTouchMode(true);
-        getView().requestFocus();
-        getView().setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-
-                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
-
-                    Fragment fragment = new SearchFrag();
-                    replaceFragment(fragment);
-
-                    return true;
-
-                }
-
-                return false;
-            }
-        });
-    }
-
 }

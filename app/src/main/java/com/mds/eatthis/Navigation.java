@@ -9,9 +9,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
+/**
+ * Created by Darren, Ming Kiang and Stanley.
+ */
 public class Navigation extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -45,13 +47,13 @@ public class Navigation extends AppCompatActivity
         }
     }
 
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         displaySelectedScreen(item.getItemId());
-        return true;
+        //set to false so that menu items are not highlighted
+        return false;
     }
 
     private void displaySelectedScreen(int itemId) {
@@ -81,5 +83,6 @@ public class Navigation extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
     }
 }

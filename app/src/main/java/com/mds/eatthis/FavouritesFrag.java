@@ -25,7 +25,7 @@ import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
 import java.util.ArrayList;
 
 /**
- * Created by Darren on 1/22/2017.
+ * Created by Darren, Ming Kiang and Stanley.
  */
 
 
@@ -48,10 +48,8 @@ public class FavouritesFrag extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //returning our layout file
-        //change R.layout.yourlayoutfilename for each of your fragments
+        //Storing of layout file in variable v
         View v = inflater.inflate(R.layout.fragment_menu_favourites, container, false);
-       /* text = (TextView) v.findViewById(R.id.textabc);*/
 
         locationdetails = new DatabaseEventsData(getActivity());
         try{
@@ -74,6 +72,7 @@ public class FavouritesFrag extends Fragment {
                 String placeid = data.id;
                 Double lat = data.coords[0];
                 Double lng = data.coords[1];
+                //putting data into Bundle and setting it as part of fragment
                 args.putString("placeid", placeid);
                 args.putString("placeName", title);
                 args.putString("address", address);
@@ -82,15 +81,7 @@ public class FavouritesFrag extends Fragment {
                 fragment.setArguments(args);
 
                 //replace with FavMapViewFrag
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.content_frame, fragment);
-                ft.commit();
-
-                System.out.println(data.title);
-                System.out.println(data.address);
-                System.out.println(data.id);
-                System.out.println(data.coords[0]); // Latitude
-                System.out.println(data.coords[1]); // Longtitude
+                replaceFragment(fragment);
             }
         });
         return v;

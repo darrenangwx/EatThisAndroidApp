@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * Created by Darren on 1/22/2017.
+ * Created by Darren, Ming Kiang and Stanley.
  */
 
 public class SplashActivity extends Activity {

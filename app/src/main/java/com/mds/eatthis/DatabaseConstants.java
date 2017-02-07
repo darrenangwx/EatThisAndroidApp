@@ -3,7 +3,7 @@ package com.mds.eatthis;
 import android.provider.BaseColumns;
 
 /**
- * Created by þïèÐú†ÇH on 1/30/2017.
+ * Created by Darren, Ming Kiang and Stanley.
  */
 
 public interface DatabaseConstants extends BaseColumns {

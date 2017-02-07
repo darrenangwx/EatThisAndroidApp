@@ -54,8 +54,7 @@ public class SearchFrag extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        //returning our layout file
-        //change R.layout.yourlayoutfilename for each of your fragments
+        //Store layout file in variable v
         View v = inflater.inflate(R.layout.fragment_menu_search, container, false);
 
         //for text box
@@ -271,8 +270,4 @@ public class SearchFrag extends Fragment {
 
         inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
-
-
-
-
 }

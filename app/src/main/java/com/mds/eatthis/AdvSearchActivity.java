@@ -1,7 +1,6 @@
 package com.mds.eatthis;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -9,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 /**
- * Created by Darren on 1/22/2017.
+ * Created by Darren, Ming Kiang and Stanley.
  */
 
 public class AdvSearchActivity extends Activity implements View.OnClickListener {

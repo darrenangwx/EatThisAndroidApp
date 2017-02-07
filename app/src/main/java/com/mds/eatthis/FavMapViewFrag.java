@@ -3,7 +3,6 @@ package com.mds.eatthis;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,13 +23,13 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -38,19 +37,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import static android.content.ContentValues.TAG;
-import static android.content.Context.MODE_PRIVATE;
-import static android.provider.BaseColumns._ID;
 import static com.mds.eatthis.DatabaseConstants.PlaceID;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLat;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLocation;
 import static com.mds.eatthis.DatabaseConstants.RestaurantLong;
 import static com.mds.eatthis.DatabaseConstants.RestaurantName;
 import static com.mds.eatthis.DatabaseConstants.TABLE_NAME;
-import static com.mds.eatthis.R.id.address;
 import static com.mds.eatthis.R.id.favmap;
 
 /**
- * Created by Darren on 2/6/2017.
+ * Created by Darren, Ming Kiang and Stanley.
  */
 
 public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
@@ -73,10 +69,11 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //returning our layout file
-        //change R.layout.yourlayoutfilename for each of your fragments
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        //Storing of layout file in variable v
         View v = inflater.inflate(R.layout.fragment_favmap, container, false);
+
+        //Storing of variables gotten from FavouritesFrag
         placeid = getArguments().getString("placeid");
         placeName = getArguments().getString("placeName");
         vicinity = getArguments().getString("address");
@@ -98,7 +95,6 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
 
         restaurant = (TextView) v.findViewById(R.id.restaurant);
         address = (TextView) v.findViewById(R.id.address);
-
         heartButton = (ImageButton) v.findViewById(R.id.favourited);
 
         locationdetails = new DatabaseEventsData(FavMapViewFrag.this.getActivity());
@@ -143,7 +139,7 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //you can set the title for your toolbar here for different fragments different titles
+        //setting of title on toolbar
         getActivity().setTitle("Map");
     }
 
@@ -156,8 +152,10 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
         Marker userLocMarker = gMap.addMarker(option);
         //set text view to appropriate text
         address.setText(vicinity);
+        //Making the text with an underline
         SpannableString content = new SpannableString(placeName);
         content.setSpan(new UnderlineSpan(),0,placeName.length(),0);
+        //set textview to appropriate text
         restaurant.setText(content);
         userLocMarker.showInfoWindow();
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(placeLatitude, placeLongitude), 17.0f));
@@ -165,7 +163,7 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
 
 
     private void addEvent() {
-        //wanted to check if record alr fav
+        //wanted to check if record already favourited
         SQLiteDatabase db = locationdetails.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -197,18 +195,17 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject result) {
-
+                        //Print out results in console
                         Log.i(TAG, "onResponse: Result= " + result.toString());
                         try {
                             if(result.getString("status").equalsIgnoreCase("OK")){
+                                //TODO: Down here?
                                 if (result.getJSONObject("result").has("website")) {
                                     String website = result.getJSONObject("result").getString("website");
 
                                     Uri uri = Uri.parse(website);
                                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                     startActivity(intent);
-
-
                                 } else {
                                     Log.i(TAG, "No website found.");
 
@@ -216,16 +213,13 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
                                     String term = placeName + " "+vicinity;   // term which you want to search for
                                     intent.putExtra(SearchManager.QUERY, term);
                                     startActivity(intent);
-
                                 }
-
                             }else if(result.getString("status").equalsIgnoreCase("ZERO_RESULTS")){
-                                //TODO do something
+                                Log.i(TAG, "No results found");
                             }
                         } catch (JSONException e1) {
                             e1.printStackTrace();
                         }
-
                     }
                 },
                 new Response.ErrorListener() {
@@ -234,8 +228,7 @@ public class FavMapViewFrag extends Fragment implements OnMapReadyCallback{
                         Log.e(TAG, "onErrorResponse: Error= " + error.getMessage());
                     }
                 });
-
-        System.out.println(request + "REQUEST RIGHT HERE");
+        //Adding request to queue
         AppController.getInstance().addToRequestQueue(request);
     }
 
