@@ -98,12 +98,10 @@ public class SearchFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
-                            .setCountry("SG")
-                            .build();
+                   
 
                     Intent intent =
-                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).setFilter(typeFilter)
+                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                                     .build(getActivity());
                     startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                     
