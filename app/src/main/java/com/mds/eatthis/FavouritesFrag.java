@@ -49,10 +49,14 @@ public class FavouritesFrag extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         //Storing of layout file in variable v
+
+        //Store layout file variable v
         View v = inflater.inflate(R.layout.fragment_menu_favourites, container, false);
+
 
         locationdetails = new DatabaseEventsData(getActivity());
         try{
+            // Try to retrieve object cursor from database
             Cursor cursor = getEvents();
             showEvents(cursor);
         }finally {
@@ -60,9 +64,11 @@ public class FavouritesFrag extends Fragment {
         }
         list = (ListView) v.findViewById(R.id.listView);
         list.setAdapter(new VivzAdapter(FavouritesFrag.this.getActivity()));
+        // An onItemClickListener when listview item is clicked
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Get the position of the Item and place it into a single row class called 'data'
                 SingleRow data = (SingleRow) list.getItemAtPosition(position);
 
                 Bundle args = new Bundle();
@@ -72,7 +78,7 @@ public class FavouritesFrag extends Fragment {
                 String placeid = data.id;
                 Double lat = data.coords[0];
                 Double lng = data.coords[1];
-                //putting data into Bundle and setting it as part of fragment
+                //Pass all of the values into Bundle and setting it as part of fragmentt
                 args.putString("placeid", placeid);
                 args.putString("placeName", title);
                 args.putString("address", address);
@@ -92,19 +98,23 @@ public class FavouritesFrag extends Fragment {
         return cursor;
     }
 
+    //Function to get the columns in DB
     private void showEvents(Cursor cursor){
+        //Counts how many rows and store them in variables
         arrayresname = new String[cursor.getCount()];
         arrayresloc = new String[cursor.getCount()];
         arrayresid = new String[cursor.getCount()];
         arrayreslat = new double[cursor.getCount()];
         arrayreslong = new double[cursor.getCount()];
         int o = 0;
+        //If cursor is not null, get the database constants and store into a string
             while(cursor.moveToNext()){
                 String allfavresname = cursor.getString(cursor.getColumnIndex(DatabaseConstants.RestaurantName));
                 String allfavresloc = cursor.getString(cursor.getColumnIndex(DatabaseConstants.RestaurantLocation));
                 String allfavresid = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PlaceID));
                 double allfavreslong = cursor.getDouble(cursor.getColumnIndex(DatabaseConstants.RestaurantLong));
                 double allfavreslat = cursor.getDouble(cursor.getColumnIndex(DatabaseConstants.RestaurantLat));
+                //and subsequently add them into a array. It will keep looping until cursor is null (no more rows)
                 arrayresname[o] = allfavresname;
                 arrayresloc[o] = allfavresloc;
                 arrayresid[o] = allfavresid;
@@ -114,6 +124,7 @@ public class FavouritesFrag extends Fragment {
             }
 
     }
+    //Returns all of the arrays and variables, so that other classes can retrieve them
     public static String[] returnArrayname()
     {
         return(arrayresname);
@@ -143,7 +154,9 @@ public class FavouritesFrag extends Fragment {
 
     public void replaceFragment(Fragment fragment){
         FragmentTransaction ft = getFragmentManager().beginTransaction();
+        //Replaces the fragment with a layout called content_frame
         ft.replace(R.id.content_frame, fragment);
+        //commit
         ft.commit();
     }
 
@@ -187,6 +200,7 @@ class SingleRow
         this.coords = coords;
     }
 }
+//Set an adapter to populate the listview
 class VivzAdapter extends BaseAdapter {
     ArrayList<SingleRow> list;
     Context context;
@@ -195,6 +209,7 @@ class VivzAdapter extends BaseAdapter {
         context = c;
         list = new ArrayList<SingleRow>();
         Resources res = c.getResources();
+        //Gets all of the returned arrays and variables declared earlier and store into variables
         String[] ArraysofResNames = FavouritesFrag.returnArrayname();
         String[] ArraysofResLocation = FavouritesFrag.returnArraylocation();
         String[] ArraysofResId = FavouritesFrag.returnArrayId();
@@ -202,11 +217,12 @@ class VivzAdapter extends BaseAdapter {
         double[] ArraysofResLongtitude = FavouritesFrag.returnArraylongtitude();
 
         for (int i = 0; i < ArraysofResNames.length; i++) {
+            //For loop to add all of the arrays into an list object
             list.add(new SingleRow(ArraysofResNames[i], ArraysofResLocation[i], ArraysofResId[i], new double[]{ArraysofResLatitude[i], ArraysofResLongtitude[i]}));
         }
 
     }
-    
+
     @Override
     public int getCount() {
         return list.size();
@@ -228,9 +244,10 @@ class VivzAdapter extends BaseAdapter {
         View row = inflater.inflate(R.layout.rows_favourites, viewGroup, false);
         TextView title = (TextView) row.findViewById(R.id.textView);
         TextView description = (TextView) row.findViewById(R.id.textView2);
-
+        //Gets the list object and store into temp
         SingleRow temp = list.get(i);
 
+        //Display the title and the address in the list object
         title.setText(temp.title);
         description.setText(temp.address);
 
